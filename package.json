@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "name": "TransportProject",
+=======
+  "name": "${PROJECT_NAME}",
+>>>>>>> f674b4e2efc724f2a48ae6e129eacdbf8d0387cb
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
