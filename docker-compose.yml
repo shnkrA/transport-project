@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # PostgreSQL база даних
+  db:
+    image: postgres:16-alpine
+    container_name: transport_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: transport_db
+      POSTGRES_USER: transport_user
+      POSTGRES_PASSWORD: transport_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - transport_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U transport_user -d transport_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NestJS Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: transport_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: transport_db
+      DB_USER: transport_user
+      DB_PASSWORD: transport_password
+      DB_SYNC: "true"
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_EXPIRES_IN: 24h
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - transport_network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: transport_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      REACT_APP_API_URL: http://localhost:3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - transport_network
+
+volumes:
+  pgdata:
+
+networks:
+  transport_network:
+    driver: bridge
