@@ -55,7 +55,7 @@ CREATE TABLE vehicles (
     license_plate VARCHAR(20) NOT NULL UNIQUE,
     vin_number VARCHAR(17) UNIQUE,
     year_manufactured SMALLINT,
-    capacity_weight DECIMAL(10,2),       -- вантажопідйомність (кг) для вантажівок
+    capacity_weight DECIMAL(10,2),       -- вантажність (кг) для вантажівок
     capacity_seats INTEGER,              -- кількість місць для автобусів
     current_mileage DECIMAL(12,2) DEFAULT 0,
     fuel_type VARCHAR(50),              -- дизель, бензин, газ
