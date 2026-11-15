@@ -1,18 +1,17 @@
 {
-<<<<<<< HEAD
   "name": "TransportProject",
-=======
-  "name": "${PROJECT_NAME}",
->>>>>>> f674b4e2efc724f2a48ae6e129eacdbf8d0387cb
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
+  "description": "Система управління транспортним підприємством",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "build": "tsc"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "typescript": "^6.0.3"
-  },
-  "private": true
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build": "npm run build:backend && npm run build:frontend"
+  }
 }
