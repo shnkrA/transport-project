@@ -9,21 +9,21 @@ export class TripsController {
 
   @Get()
   @ApiOperation({ summary: 'Отримати список рейсів' })
-  findAll(@Query() query: any) { return this.tripsService.findAll(query); }
+  findAll(@Query() query: any): Promise<unknown> { return this.tripsService.findAll(query); }
 
   @Get(':id')
   @ApiOperation({ summary: 'Отримати рейс за ID' })
-  findOne(@Param('id') id: string) { return this.tripsService.findOne(+id); }
+  findOne(@Param('id') id: string): Promise<unknown> { return this.tripsService.findOne(+id); }
 
   @Post()
   @ApiOperation({ summary: 'Створити рейс' })
-  create(@Body() data: any) { return this.tripsService.create(data); }
+  create(@Body() data: any): Promise<unknown> { return this.tripsService.create(data); }
 
   @Put(':id')
   @ApiOperation({ summary: 'Оновити рейс' })
-  update(@Param('id') id: string, @Body() data: any) { return this.tripsService.update(+id, data); }
+  update(@Param('id') id: string, @Body() data: any): Promise<unknown> { return this.tripsService.update(+id, data); }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Видалити рейс' })
-  remove(@Param('id') id: string) { return this.tripsService.remove(+id); }
+  remove(@Param('id') id: string): Promise<void> { return this.tripsService.remove(+id); }
 }

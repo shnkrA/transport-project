@@ -33,8 +33,14 @@ function Metric({ title, value, note, icon, tone }: { title: string; value: stri
 
 export function DashboardPage() {
   const bars = [48, 67, 53, 82, 62, 92, 74];
+  const today = new Intl.DateTimeFormat('uk-UA', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date()).toLocaleUpperCase('uk-UA');
   return <>
-    <div className="page-heading dashboard-heading"><div><div className="eyebrow">СУБОТА, 15 ЛИСТОПАДА 2026</div><h1>Доброго дня, Анно <span>✦</span></h1><p>Ось що відбувається у вашому автопарку сьогодні.</p></div><button className="date-button">▦ <span>Цей тиждень</span><b>⌄</b></button></div>
+    <div className="page-heading dashboard-heading"><div><div className="eyebrow">{today}</div><h1>Доброго дня, Анно <span>✦</span></h1><p>Ось що відбувається у вашому автопарку сьогодні.</p></div></div>
     <section className="hero-card"><div className="hero-copy"><span className="hero-tag"><i /> ОГЛЯД АВТОПАРКУ</span><h2>Рухаємося<br />за планом.</h2><p>Більшість рейсів сьогодні виконуються вчасно. Перегляньте актуальний стан перевезень.</p><Link to="/trips" className="hero-link">Переглянути рейси <span>↗</span></Link></div><div className="hero-image-credit">Фото: <a href="https://driveforce.ua/assets/uploads/images/content/5529f-nayshvidshi-avtobusi.png" target="_blank" rel="noreferrer">DriveForce</a></div></section>
     <section className="stats-grid">
       <Metric title="Рейсів сьогодні" value="24" note="↗ 8% до минулого тижня" icon="↗" tone="blue" />

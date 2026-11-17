@@ -44,7 +44,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </nav>
         <div className="sidebar-bottom">
           <div className="help-card"><span className="help-dot" /><div><strong>Усе під контролем</strong><small>Система працює нормально</small></div></div>
-          <div className="user-card"><div className="avatar">АП</div><div className="user-info"><strong>Анна Шинкарь</strong><small>Адміністратор</small></div><span className="user-more">···</span></div>
+          <div className="user-card"><div className="avatar">АП</div><div className="user-info"><strong>Анна Шинкарь</strong><small>Адміністратор</small></div></div>
         </div>
       </aside>
 
@@ -52,8 +52,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <header className="topbar">
           <div className="crumb"><span>Транспортне підприємство</span><b>/</b><strong>{title}</strong></div>
           <div className="top-actions">
-            <div className="search-box"><span>⌕</span><input aria-label="Пошук" placeholder="Пошук..." /><kbd>⌘ K</kbd></div>
-            <button className="icon-button notification" aria-label="Сповіщення">♧<i /></button>
             <div className="top-avatar">АП</div>
           </div>
         </header>

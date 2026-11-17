@@ -9,21 +9,21 @@ export class DriversController {
 
   @Get()
   @ApiOperation({ summary: 'Отримати список водіїв' })
-  findAll(@Query() query: any) { return this.driversService.findAll(query); }
+  findAll(@Query() query: any): Promise<unknown> { return this.driversService.findAll(query); }
 
   @Get(':id')
   @ApiOperation({ summary: 'Отримати водія за ID' })
-  findOne(@Param('id') id: string) { return this.driversService.findOne(+id); }
+  findOne(@Param('id') id: string): Promise<unknown> { return this.driversService.findOne(+id); }
 
   @Post()
   @ApiOperation({ summary: 'Створити водія' })
-  create(@Body() data: any) { return this.driversService.create(data); }
+  create(@Body() data: any): Promise<unknown> { return this.driversService.create(data); }
 
   @Put(':id')
   @ApiOperation({ summary: 'Оновити водія' })
-  update(@Param('id') id: string, @Body() data: any) { return this.driversService.update(+id, data); }
+  update(@Param('id') id: string, @Body() data: any): Promise<unknown> { return this.driversService.update(+id, data); }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Видалити водія' })
-  remove(@Param('id') id: string) { return this.driversService.remove(+id); }
+  remove(@Param('id') id: string): Promise<void> { return this.driversService.remove(+id); }
 }

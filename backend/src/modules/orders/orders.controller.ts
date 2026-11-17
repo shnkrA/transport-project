@@ -9,21 +9,21 @@ export class OrdersController {
 
   @Get()
   @ApiOperation({ summary: 'Отримати список замовлень' })
-  findAll(@Query() query: any) { return this.ordersService.findAll(query); }
+  findAll(@Query() query: any): Promise<unknown> { return this.ordersService.findAll(query); }
 
   @Get(':id')
   @ApiOperation({ summary: 'Отримати замовлення за ID' })
-  findOne(@Param('id') id: string) { return this.ordersService.findOne(+id); }
+  findOne(@Param('id') id: string): Promise<unknown> { return this.ordersService.findOne(+id); }
 
   @Post()
   @ApiOperation({ summary: 'Створити замовлення' })
-  create(@Body() data: any) { return this.ordersService.create(data); }
+  create(@Body() data: any): Promise<unknown> { return this.ordersService.create(data); }
 
   @Put(':id')
   @ApiOperation({ summary: 'Оновити замовлення' })
-  update(@Param('id') id: string, @Body() data: any) { return this.ordersService.update(+id, data); }
+  update(@Param('id') id: string, @Body() data: any): Promise<unknown> { return this.ordersService.update(+id, data); }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Видалити замовлення' })
-  remove(@Param('id') id: string) { return this.ordersService.remove(+id); }
+  remove(@Param('id') id: string): Promise<void> { return this.ordersService.remove(+id); }
 }

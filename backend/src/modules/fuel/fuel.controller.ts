@@ -9,21 +9,21 @@ export class FuelController {
 
   @Get()
   @ApiOperation({ summary: 'Отримати записи про паливо' })
-  findAll(@Query() query: any) { return this.fuelService.findAll(query); }
+  findAll(@Query() query: any): Promise<unknown> { return this.fuelService.findAll(query); }
 
   @Get(':id')
   @ApiOperation({ summary: 'Отримати запис про паливо за ID' })
-  findOne(@Param('id') id: string) { return this.fuelService.findOne(+id); }
+  findOne(@Param('id') id: string): Promise<unknown> { return this.fuelService.findOne(+id); }
 
   @Post()
   @ApiOperation({ summary: 'Створити запис про паливо' })
-  create(@Body() data: any) { return this.fuelService.create(data); }
+  create(@Body() data: any): Promise<unknown> { return this.fuelService.create(data); }
 
   @Put(':id')
   @ApiOperation({ summary: 'Оновити запис про паливо' })
-  update(@Param('id') id: string, @Body() data: any) { return this.fuelService.update(+id, data); }
+  update(@Param('id') id: string, @Body() data: any): Promise<unknown> { return this.fuelService.update(+id, data); }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Видалити запис про паливо' })
-  remove(@Param('id') id: string) { return this.fuelService.remove(+id); }
+  remove(@Param('id') id: string): Promise<void> { return this.fuelService.remove(+id); }
 }

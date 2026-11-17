@@ -9,21 +9,21 @@ export class VehiclesController {
 
   @Get()
   @ApiOperation({ summary: 'Отримати список ТЗ' })
-  findAll(@Query() query: any) { return this.vehiclesService.findAll(query); }
+  findAll(@Query() query: any): Promise<unknown> { return this.vehiclesService.findAll(query); }
 
   @Get(':id')
   @ApiOperation({ summary: 'Отримати ТЗ за ID' })
-  findOne(@Param('id') id: string) { return this.vehiclesService.findOne(+id); }
+  findOne(@Param('id') id: string): Promise<unknown> { return this.vehiclesService.findOne(+id); }
 
   @Post()
   @ApiOperation({ summary: 'Створити ТЗ' })
-  create(@Body() data: any) { return this.vehiclesService.create(data); }
+  create(@Body() data: any): Promise<unknown> { return this.vehiclesService.create(data); }
 
   @Put(':id')
   @ApiOperation({ summary: 'Оновити ТЗ' })
-  update(@Param('id') id: string, @Body() data: any) { return this.vehiclesService.update(+id, data); }
+  update(@Param('id') id: string, @Body() data: any): Promise<unknown> { return this.vehiclesService.update(+id, data); }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Видалити ТЗ' })
-  remove(@Param('id') id: string) { return this.vehiclesService.remove(+id); }
+  remove(@Param('id') id: string): Promise<void> { return this.vehiclesService.remove(+id); }
 }
