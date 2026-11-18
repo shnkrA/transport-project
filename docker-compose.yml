@@ -18,7 +18,7 @@ services:
     networks:
       - transport_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U transport_user -d transport_db"]
+      test: ["CMD-SHELL", "pg_isready -U transport -d transport_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -39,8 +39,8 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: transport_db
-      DB_USER: transport_user
-      DB_PASSWORD: transport_password
+      DB_USER: transport
+      DB_PASSWORD: transport
       DB_SYNC: "true"
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       JWT_EXPIRES_IN: 24h
