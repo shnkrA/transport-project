@@ -16,11 +16,13 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { TariffsModule } from './modules/tariffs/tariffs.module';
 import { GpsModule } from './modules/gps/gps.module';
+import { DatabaseSeedService } from './database-seed.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', '../.env'],
       load: [databaseConfig],
     }),
     TypeOrmModule.forRootAsync({
@@ -28,12 +30,12 @@ import { GpsModule } from './modules/gps/gps.module';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 5432),
-        username: configService.get('DB_USER', 'transport_user'),
-        password: configService.get('DB_PASSWORD', 'transport_password'),
+        port: Number(configService.get('DB_PORT', 5433)),
+        username: configService.get('DB_USER', 'transport'),
+        password: configService.get('DB_PASSWORD', 'transport'),
         database: configService.get('DB_NAME', 'transport_db'),
         autoLoadEntities: true,
-        synchronize: configService.get('DB_SYNC', false),
+        synchronize: configService.get<string>('DB_SYNC', 'false') === 'true',
       }),
       inject: [ConfigService],
     }),
@@ -50,5 +52,6 @@ import { GpsModule } from './modules/gps/gps.module';
     TariffsModule,
     GpsModule,
   ],
+  providers: [DatabaseSeedService],
 })
 export class AppModule {}

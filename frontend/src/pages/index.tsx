@@ -1,5 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import { getCurrentUser } from '../services/session';
 
 const pages = {
   orders: { title: 'Замовлення', group: 'ОПЕРАЦІЇ', description: 'Заявки клієнтів і стан обробки перевезень.', action: '＋ Нове замовлення', heads: ['Номер', 'Клієнт', 'Маршрут', 'Дата', 'Статус'], rows: [['ЗМ-0248', 'ТОВ «АгроТранс»', 'Київ → Львів', '15 листопада', 'Підтверджено'], ['ЗМ-0247', 'ПП «Вектор»', 'Одеса → Київ', '15 листопада', 'На розгляді'], ['ЗМ-0246', 'ТОВ «Будсервіс»', 'Дніпро → Харків', '14 листопада', 'Виконано']] },
@@ -32,6 +34,7 @@ function Metric({ title, value, note, icon, tone }: { title: string; value: stri
 }
 
 export function DashboardPage() {
+  const currentUser = getCurrentUser();
   const bars = [48, 67, 53, 82, 62, 92, 74];
   const today = new Intl.DateTimeFormat('uk-UA', {
     weekday: 'long',
@@ -40,8 +43,8 @@ export function DashboardPage() {
     year: 'numeric',
   }).format(new Date()).toLocaleUpperCase('uk-UA');
   return <>
-    <div className="page-heading dashboard-heading"><div><div className="eyebrow">{today}</div><h1>Доброго дня, Анно</h1><p>Ось що відбувається у вашому автопарку сьогодні.</p></div></div>
-    <section className="hero-card"><div className="hero-copy"><span className="hero-tag"><i /> ОГЛЯД АВТОПАРКУ</span><h2>Рухаємося<br />за планом.</h2><p>Більшість рейсів сьогодні виконуються вчасно. Перегляньте актуальний стан перевезень.</p><Link to="/trips" className="hero-link">Переглянути рейси <span>↗</span></Link></div><div className="hero-image-credit">Фото: <a href="https://driveforce.ua/assets/uploads/images/content/5529f-nayshvidshi-avtobusi.png" target="_blank" rel="noreferrer">DriveForce</a></div></section>
+    <div className="page-heading dashboard-heading"><div><div className="eyebrow">{today}</div><h1>Доброго дня, {currentUser?.firstName ?? 'користувачу'}</h1><p>Ось що відбувається у вашому автопарку сьогодні</p></div></div>
+    <section className="hero-card"><div className="hero-copy"><span className="hero-tag"><i /> ОГЛЯД АВТОПАРКУ</span><h2>Рухаємося<br />за планом</h2><p>Більшість рейсів сьогодні виконуються вчасно. Перегляньте актуальний стан перевезень</p><Link to="/trips" className="hero-link">Переглянути рейси <span>↗</span></Link></div><div className="hero-image-credit">Фото: <a href="https://driveforce.ua/assets/uploads/images/content/5529f-nayshvidshi-avtobusi.png" target="_blank" rel="noreferrer">DriveForce</a></div></section>
     <section className="stats-grid">
       <Metric title="Рейсів сьогодні" value="24" note="↗ 8% до минулого тижня" icon="↗" tone="blue" />
       <Metric title="Зараз у дорозі" value="18" note="75% усіх запланованих" icon="◉" tone="navy" />
@@ -63,8 +66,37 @@ export function DashboardPage() {
 export function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const submit = (event: FormEvent) => { event.preventDefault(); navigate('/dashboard'); };
-  return <main className="login-page"><div className="login-photo"><Link to="/dashboard" className="brand login-brand"><span className="brand-mark">Т</span><span><strong>ТРАНЗИТ</strong><small>СИСТЕМА КЕРУВАННЯ</small></span></Link><div className="login-photo-copy"><span>ВЕСЬ АВТОПАРК — В ОДНОМУ МІСЦІ</span><h1>Керуйте рухом.<br />Плануйте впевнено.</h1></div><div className="login-photo-credit">Фото: <a href="https://unsplash.com/photos/a-large-blue-truck-driving-down-a-road-C_EjEYdFc1Q" target="_blank" rel="noreferrer">Unsplash</a></div></div><div className="login-side"><form className="login-form" onSubmit={submit}><span className="eyebrow">РАДІ БАЧИТИ ВАС</span><h2>Вхід у систему</h2><p>Увійдіть, щоб продовжити роботу з автопарком.</p><label htmlFor="email">Електронна пошта</label><input id="email" type="email" placeholder="name@company.ua" value={email} onChange={(event) => setEmail(event.target.value)} required /><label htmlFor="password">Пароль</label><input id="password" type="password" placeholder="Введіть пароль" required /><button className="primary-button login-submit">Увійти в демо</button><small className="login-demo-note">Демо-режим: вхід не перевіряє облікові дані</small></form><div className="login-footer">© 2026 Транзит · Керування транспортом</div></div></main>;
+  const [error, setError] = useState('');
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); setError('');
+    const form = new FormData(event.currentTarget);
+    try {
+      const { data } = await api.post('/auth/login', { email, password: form.get('password') });
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      navigate('/dashboard');
+    } catch { setError('Перевірте пошту й пароль та спробуйте ще раз.'); }
+  };
+  return <main className="login-page"><div className="login-photo"><Link to="/register" className="brand login-brand"><span className="brand-mark">Т</span><span><strong>ТРАНЗИТ</strong><small>СИСТЕМА КЕРУВАННЯ</small></span></Link><div className="login-photo-copy"><span>ВЕСЬ АВТОПАРК — В ОДНОМУ МІСЦІ</span><h1>Керуйте рухом.<br />Плануйте впевнено.</h1></div><div className="login-photo-credit">Фото: <a href="https://unsplash.com/photos/a-large-blue-truck-driving-down-a-road-C_EjEYdFc1Q" target="_blank" rel="noreferrer">Unsplash</a></div></div><div className="login-side"><form className="login-form" onSubmit={submit}><span className="eyebrow">РАДІ БАЧИТИ ВАС</span><h2>Вхід у систему</h2><p>Увійдіть, щоб продовжити роботу з автопарком.</p><label htmlFor="email">Електронна пошта</label><input id="email" type="email" placeholder="name@company.ua" value={email} onChange={(event) => setEmail(event.target.value)} required /><label htmlFor="password">Пароль</label><input id="password" name="password" type="password" placeholder="Введіть пароль" required minLength={8} />{error && <small className="auth-error">{error}</small>}<button className="primary-button login-submit">Увійти</button><small className="login-demo-note">Ще не маєте облікового запису? <Link to="/register">Зареєструватися</Link></small></form><div className="login-footer">© 2026 Транзит · Керування транспортом</div></div></main>;
+}
+
+export function RegisterPage() {
+  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); setError('');
+    const form = new FormData(event.currentTarget);
+    try {
+      await api.post('/auth/register', {
+        firstName: form.get('firstName'), lastName: form.get('lastName'),
+        email: form.get('email'), password: form.get('password'),
+      });
+      navigate('/login', { state: { registered: true } });
+    } catch (reason: any) {
+      setError(reason?.response?.data?.message ?? 'Не вдалося створити обліковий запис');
+    }
+  };
+  return <main className="login-page"><div className="login-photo"><Link to="/register" className="brand login-brand"><span className="brand-mark">Т</span><span><strong>ТРАНЗИТ</strong><small>СИСТЕМА КЕРУВАННЯ</small></span></Link><div className="login-photo-copy"><span>ПАСАЖИРСЬКІ ТА ВАНТАЖНІ ПЕРЕВЕЗЕННЯ</span><h1>Плануйте<br />свою поїздку</h1></div><div className="login-photo-credit">© 2026 Транзит</div></div><div className="login-side"><form className="login-form" onSubmit={submit}><span className="eyebrow">СТВОРІТЬ ОБЛІКОВИЙ ЗАПИС</span><h2>Реєстрація</h2><p>Зареєструйтеся як клієнт, щоб замовити перевезення.</p><label htmlFor="firstName">Ім’я</label><input id="firstName" name="firstName" autoComplete="given-name" required minLength={2} /><label htmlFor="lastName">Прізвище</label><input id="lastName" name="lastName" autoComplete="family-name" required minLength={2} /><label htmlFor="registerEmail">Електронна пошта</label><input id="registerEmail" name="email" type="email" autoComplete="email" placeholder="name@example.com" required /><label htmlFor="registerPassword">Пароль</label><input id="registerPassword" name="password" type="password" autoComplete="new-password" minLength={8} placeholder="Щонайменше 8 символів" required />{error && <small className="auth-error">{Array.isArray(error) ? error.join(', ') : error}</small>}<button className="primary-button login-submit">Зареєструватися</button><small className="login-demo-note">Вже маєте обліковий запис? <Link to="/login">Увійти</Link></small></form><div className="login-footer">© 2026 Транзит · Керування транспортом</div></div></main>;
 }
 
 export const OrdersPage = () => <SectionPage section="orders" />;

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -10,6 +10,17 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async register(data: { firstName: string; lastName: string; email: string; password: string }) {
+    const email = data.email.toLowerCase().trim();
+    if (await this.usersService.findByEmail(email)) {
+      throw new ConflictException('Ця електронна пошта вже зареєстрована');
+    }
+    const role = await this.usersService.findRoleByName('user');
+    if (!role) throw new UnauthorizedException('Роль користувача не налаштована');
+    const user = await this.usersService.create({ ...data, email, roleId: role.id });
+    return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: 'user' };
+  }
+
   async login(credentials: { email: string; password: string }) {
     const user = await this.usersService.findByEmail(credentials.email);
     if (!user) {
@@ -19,6 +30,7 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Невірний email або пароль');
     }
+    if (!user.isActive) throw new UnauthorizedException('Обліковий запис вимкнено');
     const payload = { sub: user.id, email: user.email, roleId: user.roleId };
     return {
       accessToken: this.jwtService.sign(payload),
@@ -26,7 +38,11 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
       }),
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName },
+      user: {
+        id: user.id, email: user.email, firstName: user.firstName,
+        lastName: user.lastName, roleId: user.roleId,
+        role: await this.usersService.getRoleName(user.roleId),
+      },
     };
   }
 

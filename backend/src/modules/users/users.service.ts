@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
+import { Role } from '../../entities/role.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -9,6 +10,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly rolesRepository: Repository<Role>,
   ) {}
 
   async findAll(query?: any): Promise<User[]> {
@@ -25,8 +28,16 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({ where: { email: email.toLowerCase().trim() } });
     return user ?? undefined;
+  }
+
+  findRoleByName(name: string): Promise<Role | null> {
+    return this.rolesRepository.findOne({ where: { name } });
+  }
+
+  async getRoleName(roleId: number): Promise<string | undefined> {
+    return (await this.rolesRepository.findOne({ where: { id: roleId } }))?.name;
   }
 
   async create(data: any): Promise<User> {
@@ -34,7 +45,7 @@ export class UsersService {
     user.firstName = data.firstName;
     user.lastName = data.lastName;
     user.middleName = data.middleName;
-    user.email = data.email;
+    user.email = data.email.toLowerCase().trim();
     user.phone = data.phone;
     user.roleId = data.roleId;
     user.passwordHash = await bcrypt.hash(data.password, 10);

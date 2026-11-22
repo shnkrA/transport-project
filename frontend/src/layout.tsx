@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { getCurrentUser, getRoleLabel, getUserInitials } from './services/session';
 
 const navigation = [
   { label: 'Огляд', path: '/dashboard', icon: '◫' },
@@ -23,7 +24,15 @@ const titles: Record<string, string> = {
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const title = titles[location.pathname] ?? 'Огляд';
+  const currentUser = getCurrentUser();
+
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
+    navigate('/register');
+  };
 
   return (
     <div className="app-shell">
@@ -44,7 +53,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </nav>
         <div className="sidebar-bottom">
           <div className="help-card"><span className="help-dot" /><div><strong>Усе під контролем</strong><small>Система працює нормально</small></div></div>
-          <div className="user-card"><div className="avatar">АП</div><div className="user-info"><strong>Анна Шинкарь</strong><small>Адміністратор</small></div></div>
+          <div className="user-card"><div className="avatar">{getUserInitials(currentUser)}</div><div className="user-info"><strong>{currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Користувач'}</strong><small>{getRoleLabel(currentUser?.role)}</small></div><button className="logout-button" type="button" onClick={logout}>Вийти</button></div>
         </div>
       </aside>
 
@@ -52,7 +61,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <header className="topbar">
           <div className="crumb"><span>Транспортне підприємство</span><b>/</b><strong>{title}</strong></div>
           <div className="top-actions">
-            <div className="top-avatar">АП</div>
+            <div className="top-avatar">{getUserInitials(currentUser)}</div>
           </div>
         </header>
         <div className="page-content">{children}</div>

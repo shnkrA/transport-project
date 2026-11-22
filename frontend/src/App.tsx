@@ -4,6 +4,7 @@ import {
   DashboardPage,
   DriversPage,
   LoginPage,
+  RegisterPage,
   MaintenancePage,
   OrdersPage,
   TripsPage,
@@ -15,6 +16,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route element={<AppLayout><Outlet /></AppLayout>}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/orders" element={<OrdersPage />} />
@@ -24,8 +26,8 @@ function App() {
         <Route path="/maintenance" element={<MaintenancePage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
       </Route>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<Navigate to="/register" replace />} />
+      <Route path="*" element={<Navigate to="/register" replace />} />
     </Routes>
   );
 }

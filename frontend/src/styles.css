@@ -187,6 +187,21 @@ button {
   color: var(--muted);
   margin-top: 3px
 }
+.logout-button {
+  border: 1px solid #e5eaf2;
+  border-radius: 7px;
+  background: #fff;
+  color: #59677e;
+  padding: 7px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  transition: background .15s ease, color .15s ease, border-color .15s ease
+}
+.logout-button:hover {
+  background: #fff1f2;
+  border-color: #ffd9dd;
+  color: #cf3445
+}
 .user-more {
   color: #8791a3;
   letter-spacing: 2px;
@@ -1187,3 +1202,5 @@ tbody tr:last-child td {
     display: none
   }
 }
+
+.auth-error { display: block; color: #c63845; margin: 10px 0; line-height: 1.5; }
