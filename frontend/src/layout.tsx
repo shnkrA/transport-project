@@ -4,22 +4,14 @@ import { getCurrentUser, getRoleLabel, getUserInitials } from './services/sessio
 
 const navigation = [
   { label: 'Огляд', path: '/dashboard', icon: '◫' },
-  { label: 'Замовлення', path: '/orders', icon: '▤' },
   { label: 'Рейси', path: '/trips', icon: '↗' },
   { label: 'Автопарк', path: '/vehicles', icon: '▰' },
-  { label: 'Водії', path: '/drivers', icon: '♙' },
-  { label: 'Техобслуговування', path: '/maintenance', icon: '⚙' },
-  { label: 'Аналітика', path: '/analytics', icon: '▥' },
 ];
 
 const titles: Record<string, string> = {
   '/dashboard': 'Огляд',
-  '/orders': 'Замовлення',
   '/trips': 'Рейси',
   '/vehicles': 'Автопарк',
-  '/drivers': 'Водії',
-  '/maintenance': 'Техобслуговування',
-  '/analytics': 'Аналітика',
 };
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -47,7 +39,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <NavLink key={item.path} to={item.path} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
               <span className="nav-icon" aria-hidden="true">{item.icon}</span>
               <span>{item.label}</span>
-              {item.path === '/maintenance' && <i className="nav-count">2</i>}
             </NavLink>
           ))}
         </nav>

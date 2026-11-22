@@ -7,15 +7,7 @@ import { databaseConfig } from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
-import { DriversModule } from './modules/drivers/drivers.module';
-import { OrdersModule } from './modules/orders/orders.module';
 import { TripsModule } from './modules/trips/trips.module';
-import { MaintenanceModule } from './modules/maintenance/maintenance.module';
-import { FuelModule } from './modules/fuel/fuel.module';
-import { DocumentsModule } from './modules/documents/documents.module';
-import { AnalyticsModule } from './modules/analytics/analytics.module';
-import { TariffsModule } from './modules/tariffs/tariffs.module';
-import { GpsModule } from './modules/gps/gps.module';
 import { DatabaseSeedService } from './database-seed.service';
 
 @Module({
@@ -42,15 +34,7 @@ import { DatabaseSeedService } from './database-seed.service';
     AuthModule,
     UsersModule,
     VehiclesModule,
-    DriversModule,
-    OrdersModule,
     TripsModule,
-    MaintenanceModule,
-    FuelModule,
-    DocumentsModule,
-    AnalyticsModule,
-    TariffsModule,
-    GpsModule,
   ],
   providers: [DatabaseSeedService],
 })

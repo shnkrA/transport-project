@@ -17,7 +17,6 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     const roles = [
       ['admin', 'Адміністратор'], ['dispatcher', 'Диспетчер'],
       ['logistician', 'Логіст'], ['driver', 'Водій'], ['user', 'Клієнт'],
-      ['mechanic', 'Механік'], ['cashier', 'Касир'],
     ];
     for (const [name, description] of roles) {
       await this.dataSource.query(
@@ -25,22 +24,18 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         [name, description],
       );
     }
-    await this.dataSource.query(
-      "INSERT INTO vehicle_types (name, description) VALUES ('train', 'Пасажирський залізничний транспорт') ON CONFLICT (name) DO NOTHING",
-    );
     const transport = [
-      ['bus', 'Мікроавтобус, 7 місць', 'DEMO-BUS-007', 7, 'Дизель'],
-      ['bus', 'Автобус, 20 місць', 'DEMO-BUS-020', 20, 'Дизель'],
-      ['bus', 'Автобус, 40 місць', 'DEMO-BUS-040', 40, 'Дизель'],
-      ['train', 'Пасажирський вагон купейний УЗ (36 місць)', 'DEMO-TRAIN-036', 36, null],
-      ['train', 'Пасажирський вагон плацкартний УЗ (54 місця)', 'DEMO-TRAIN-054', 54, null],
+      ['bus', 'Мікроавтобус, 7 місць', 'DEMO-BUS-007', 7],
+      ['bus', 'Автобус, 20 місць', 'DEMO-BUS-020', 20],
+      ['bus', 'Автобус, 40 місць', 'DEMO-BUS-040', 40],
+      ['train', 'Пасажирський вагон купейний УЗ (36 місць)', 'DEMO-TRAIN-036', 36],
+      ['train', 'Пасажирський вагон плацкартний УЗ (54 місця)', 'DEMO-TRAIN-054', 54],
     ];
-    for (const [type, model, code, seats, fuel] of transport) {
+    for (const [type, model, code, seats] of transport) {
       await this.dataSource.query(
-        `INSERT INTO vehicles (type_id, status_id, model, license_plate, capacity_seats, fuel_type)
-         SELECT vt.id, vs.id, $2, $3, $4, $5 FROM vehicle_types vt, vehicle_statuses vs
-         WHERE vt.name = $1 AND vs.name = 'available' ON CONFLICT (license_plate) DO NOTHING`,
-        [type, model, code, seats, fuel],
+        `INSERT INTO vehicles (vehicle_type, status, model, license_plate, capacity_seats)
+         VALUES ($1, 'available', $2, $3, $4) ON CONFLICT (license_plate) DO NOTHING`,
+        [type, model, code, seats],
       );
     }
     for (const account of staff) {
