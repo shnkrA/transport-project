@@ -1,11 +1,24 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { DispatcherGuard } from '../auth/dispatcher.guard';
 
 @ApiTags('Транспортні засоби')
 @Controller('vehicles')
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
+
+  @Get('dispatch')
+  @UseGuards(DispatcherGuard)
+  @ApiOperation({ summary: 'Отримати автопарк для диспетчера' })
+  getDispatchVehicles(): Promise<unknown> { return this.vehiclesService.getDispatchVehicles(); }
+
+  @Patch(':id/dispatch-status')
+  @UseGuards(DispatcherGuard)
+  @ApiOperation({ summary: 'Змінити стан транспорту диспетчером' })
+  setDispatchStatus(@Param('id') id: string, @Body() data: { status: string }): Promise<unknown> {
+    return this.vehiclesService.setDispatchStatus(+id, data.status);
+  }
 
   @Get()
   @ApiOperation({ summary: 'Отримати список ТЗ' })

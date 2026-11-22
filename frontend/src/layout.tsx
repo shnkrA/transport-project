@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { getCurrentUser, getRoleLabel, getUserInitials } from './services/session';
 
-const navigation = [
+const staffNavigation = [
   { label: 'Огляд', path: '/dashboard', icon: '◫' },
   { label: 'Рейси', path: '/trips', icon: '↗' },
   { label: 'Автопарк', path: '/vehicles', icon: '▰' },
@@ -13,12 +13,37 @@ const titles: Record<string, string> = {
   '/trips': 'Рейси',
   '/vehicles': 'Автопарк',
 };
+const customerNavigation = [
+  { label: 'Огляд', path: '/dashboard', icon: '◫' },
+  { label: 'Доступний транспорт', path: '/available-transport', icon: '▰' },
+  { label: 'Рейси', path: '/trips', icon: '↗' },
+  { label: 'Мої рейси', path: '/my-trips', icon: '▤' },
+];
+const customerTitles: Record<string, string> = {
+  '/dashboard': 'Огляд',
+  '/available-transport': 'Доступний транспорт',
+  '/trips': 'Рейси',
+  '/my-trips': 'Мої рейси',
+};
+const dispatcherNavigation = [
+  { label: 'Рейси на підтвердження', path: '/dispatch/pending', icon: '✓' },
+  { label: 'Рейси у дорозі', path: '/dispatch/in-progress', icon: '↗' },
+  { label: 'Транспорт і ТО', path: '/dispatch/vehicles', icon: '⚙' },
+];
+const dispatcherTitles: Record<string, string> = {
+  '/dispatch/pending': 'Рейси на підтвердження',
+  '/dispatch/in-progress': 'Рейси у дорозі',
+  '/dispatch/vehicles': 'Транспорт і ТО',
+};
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const title = titles[location.pathname] ?? 'Огляд';
   const currentUser = getCurrentUser();
+  const isCustomer = currentUser?.role === 'user';
+  const isDispatcher = currentUser?.role === 'dispatcher';
+  const title = (isCustomer ? customerTitles : isDispatcher ? dispatcherTitles : titles)[location.pathname] ?? 'Огляд';
+  const navigation = isCustomer ? customerNavigation : isDispatcher ? dispatcherNavigation : staffNavigation;
 
   const logout = () => {
     localStorage.removeItem('accessToken');

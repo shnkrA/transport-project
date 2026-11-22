@@ -7,6 +7,10 @@ const staff = [
   { role: 'dispatcher', firstName: 'Олена', lastName: 'Кравець', email: 'dispatcher@transit.demo', password: 'DispatchTransit2026!' },
   { role: 'logistician', firstName: 'Ігор', lastName: 'Мельник', email: 'logistics@transit.demo', password: 'LogisticsTransit2026!' },
   { role: 'driver', firstName: 'Олександр', lastName: 'Коваль', email: 'driver@transit.demo', password: 'DriverTransit2026!' },
+  { role: 'driver', firstName: 'Ірина', lastName: 'Мельник', email: 'driver2@transit.demo', password: 'Driver2Transit2026!' },
+  { role: 'driver', firstName: 'Сергій', lastName: 'Бондар', email: 'driver3@transit.demo', password: 'Driver3Transit2026!' },
+  { role: 'driver', firstName: 'Марія', lastName: 'Романюк', email: 'driver4@transit.demo', password: 'Driver4Transit2026!' },
+  { role: 'driver', firstName: 'Андрій', lastName: 'Ткачук', email: 'driver5@transit.demo', password: 'Driver5Transit2026!' },
 ];
 
 @Injectable()

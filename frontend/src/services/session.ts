@@ -1,4 +1,5 @@
 export type SessionUser = {
+  id?: number;
   firstName: string;
   lastName: string;
   role?: string;
