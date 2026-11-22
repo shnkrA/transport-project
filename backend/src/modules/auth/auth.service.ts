@@ -18,7 +18,7 @@ export class AuthService {
     const role = await this.usersService.findRoleByName('user');
     if (!role) throw new UnauthorizedException('Роль користувача не налаштована');
     const user = await this.usersService.create({ ...data, email, roleId: role.id });
-    return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: 'user' };
+    return this.createSession(user);
   }
 
   async login(credentials: { email: string; password: string }) {
@@ -31,6 +31,10 @@ export class AuthService {
       throw new UnauthorizedException('Невірний email або пароль');
     }
     if (!user.isActive) throw new UnauthorizedException('Обліковий запис вимкнено');
+    return this.createSession(user);
+  }
+
+  private async createSession(user: { id: number; email: string; firstName: string; lastName: string; roleId: number }) {
     const payload = { sub: user.id, email: user.email, roleId: user.roleId };
     return {
       accessToken: this.jwtService.sign(payload),

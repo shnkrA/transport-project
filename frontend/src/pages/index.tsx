@@ -87,11 +87,13 @@ export function RegisterPage() {
     event.preventDefault(); setError('');
     const form = new FormData(event.currentTarget);
     try {
-      await api.post('/auth/register', {
+      const { data } = await api.post('/auth/register', {
         firstName: form.get('firstName'), lastName: form.get('lastName'),
         email: form.get('email'), password: form.get('password'),
       });
-      navigate('/login', { state: { registered: true } });
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      navigate('/dashboard');
     } catch (reason: any) {
       setError(reason?.response?.data?.message ?? 'Не вдалося створити обліковий запис');
     }
