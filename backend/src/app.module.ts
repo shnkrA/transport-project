@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { databaseConfig } from './config/database.config';
 
 // Модулі додатку
 import { AuthModule } from './modules/auth/auth.module';
@@ -15,7 +14,6 @@ import { DatabaseSeedService } from './database-seed.service';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../.env'],
-      load: [databaseConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

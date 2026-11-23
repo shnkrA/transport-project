@@ -1,27 +1,31 @@
 # ==========================================
 # Build stage
 # ==========================================
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/package.json
+COPY frontend/package.json ./frontend/package.json
+RUN npm ci --workspace backend
 
-COPY . .
-RUN npm run build
+COPY backend ./backend
+RUN npm run build --workspace backend
 
 # ==========================================
 # Production stage
 # ==========================================
-FROM node:20-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --only=production
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/package.json
+COPY frontend/package.json ./frontend/package.json
+RUN npm ci --omit=dev --workspace backend
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/backend/dist ./backend/dist
 
 # Non-root user
 RUN addgroup -g 1001 -S nodejs
@@ -30,4 +34,4 @@ USER nestjs
 
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+CMD ["node", "backend/dist/main.js"]

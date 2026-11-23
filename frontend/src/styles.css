@@ -780,24 +780,6 @@ tbody tr:last-child td {
   color: #dc4e5d;
   background: #fff0f1
 }
-.demo-note {
-  padding: 12px 10px;
-  border-top: 1px solid #f0f2f5;
-  color: #99a2af;
-  font-size: 8px;
-  display: flex;
-  align-items: center;
-  gap: 7px
-}
-.demo-note span {
-  display: grid;
-  place-items: center;
-  width: 13px;
-  height: 13px;
-  border: 1px solid #b0b8c3;
-  border-radius: 50%;
-  font-size: 8px
-}
 .table-panel {
   padding-bottom: 0
 }
