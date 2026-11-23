@@ -12,18 +12,54 @@ export class TripsService {
   ) {}
 
   async getCatalog(): Promise<any> {
-    const [routes, drivers] = await Promise.all([this.dataSource.query(
+    const routes = await this.dataSource.query(
       `SELECT id, origin, destination, transport_type AS "transportType",
               distance_km AS "distanceKm", duration_minutes AS "durationMinutes",
               train_number AS "trainNumber", departure_time AS "departureTime",
               source_url AS "sourceUrl"
        FROM route_catalog WHERE is_active = TRUE ORDER BY origin, destination, transport_type`,
-    ), this.dataSource.query(
-      `SELECT first_name AS "firstName", last_name AS "lastName"
-       FROM users u JOIN roles r ON r.id = u.role_id
-       WHERE r.name = 'driver' AND u.is_active = TRUE ORDER BY u.id LIMIT 1`,
-    )]);
-    return { routes, driver: drivers[0] ?? null };
+    );
+    return { routes };
+  }
+
+  async getOverview(): Promise<any> {
+    const [counts, fleet, recentTrips, activity] = await Promise.all([
+      this.dataSource.query(
+        `SELECT
+           (SELECT COUNT(*) FROM trips WHERE departure_time::date = CURRENT_DATE)::int AS "tripsToday",
+           (SELECT COUNT(*) FROM trips WHERE status = 'in_progress')::int AS "tripsInProgress",
+           (SELECT COUNT(*) FROM vehicles WHERE status = 'available')::int AS "availableVehicles",
+           (SELECT COUNT(*) FROM vehicles WHERE status IN ('maintenance', 'out_of_service'))::int AS "vehiclesNeedingAttention"`,
+      ),
+      this.dataSource.query(
+        `SELECT COUNT(*)::int AS total,
+           COUNT(*) FILTER (WHERE status = 'in_trip')::int AS "inTrip",
+           COUNT(*) FILTER (WHERE status = 'available')::int AS available,
+           COUNT(*) FILTER (WHERE status = 'maintenance')::int AS maintenance,
+           COUNT(*) FILTER (WHERE status = 'out_of_service')::int AS "outOfService"
+         FROM vehicles`,
+      ),
+      this.dataSource.query(
+        `SELECT t.id, t.departure_point AS "departurePoint", t.arrival_point AS "arrivalPoint",
+                t.departure_time AS "departureTime", t.status,
+                d.first_name AS "driverFirstName", d.last_name AS "driverLastName",
+                v.vehicle_type AS "vehicleType", v.model AS "vehicleModel"
+         FROM trips t
+         LEFT JOIN users d ON d.id = t.driver_id
+         LEFT JOIN vehicles v ON v.id = t.vehicle_id
+         ORDER BY t.departure_time DESC NULLS LAST, t.created_at DESC
+         LIMIT 5`,
+      ),
+      this.dataSource.query(
+        `SELECT days.day::date AS date,
+           COUNT(t.id) FILTER (WHERE t.status = 'completed')::int AS completed,
+           COUNT(t.id) FILTER (WHERE t.status IN ('pending', 'confirmed', 'in_progress'))::int AS scheduled
+         FROM generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, INTERVAL '1 day') AS days(day)
+         LEFT JOIN trips t ON t.departure_time::date = days.day::date
+         GROUP BY days.day ORDER BY days.day`,
+      ),
+    ]);
+    return { counts: counts[0], fleet: fleet[0], recentTrips, activity };
   }
 
   getDispatchBoard(status: 'pending' | 'confirmed' | 'in_progress'): Promise<any[]> {
@@ -117,7 +153,17 @@ export class TripsService {
     return saved;
   }
 
-  async findAll(query?: any): Promise<Trip[]> { return this.tripsRepository.find(); }
+  async findAll(query?: any): Promise<any[]> {
+    return this.dataSource.query(
+      `SELECT t.*, v.vehicle_type AS "vehicleType", v.model AS "vehicleModel",
+              v.license_plate AS "licensePlate", d.first_name AS "driverFirstName",
+              d.last_name AS "driverLastName"
+       FROM trips t
+       LEFT JOIN vehicles v ON v.id = t.vehicle_id
+       LEFT JOIN users d ON d.id = t.driver_id
+       ORDER BY t.departure_time DESC NULLS LAST, t.created_at DESC`,
+    );
+  }
   findByCustomer(customerId: number): Promise<any[]> {
     return this.dataSource.query(
       `SELECT t.*, v.vehicle_type AS "vehicleType", v.model AS "vehicleModel",
@@ -126,6 +172,16 @@ export class TripsService {
        WHERE t.customer_id = $1
        ORDER BY t.departure_time ASC NULLS LAST, t.created_at DESC`,
       [customerId],
+    );
+  }
+  findByDriver(driverId: number): Promise<any[]> {
+    return this.dataSource.query(
+      `SELECT t.*, v.vehicle_type AS "vehicleType", v.model AS "vehicleModel",
+              v.license_plate AS "licensePlate", v.status AS "vehicleStatus"
+       FROM trips t JOIN vehicles v ON v.id = t.vehicle_id
+       WHERE t.driver_id = $1 AND v.vehicle_type <> 'train'
+       ORDER BY t.departure_time ASC NULLS LAST, t.created_at DESC`,
+      [driverId],
     );
   }
   async findOne(id: number): Promise<Trip> {

@@ -28,20 +28,6 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         [name, description],
       );
     }
-    const transport = [
-      ['bus', 'Мікроавтобус, 7 місць', 'DEMO-BUS-007', 7],
-      ['bus', 'Автобус, 20 місць', 'DEMO-BUS-020', 20],
-      ['bus', 'Автобус, 40 місць', 'DEMO-BUS-040', 40],
-      ['train', 'Пасажирський вагон купейний УЗ (36 місць)', 'DEMO-TRAIN-036', 36],
-      ['train', 'Пасажирський вагон плацкартний УЗ (54 місця)', 'DEMO-TRAIN-054', 54],
-    ];
-    for (const [type, model, code, seats] of transport) {
-      await this.dataSource.query(
-        `INSERT INTO vehicles (vehicle_type, status, model, license_plate, capacity_seats)
-         VALUES ($1, 'available', $2, $3, $4) ON CONFLICT (license_plate) DO NOTHING`,
-        [type, model, code, seats],
-      );
-    }
     for (const account of staff) {
       const exists = await this.dataSource.query('SELECT id FROM users WHERE email = $1', [account.email]);
       if (exists.length) continue;

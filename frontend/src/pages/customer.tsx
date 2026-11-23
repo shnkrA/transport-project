@@ -5,7 +5,7 @@ import { getCurrentUser } from '../services/session';
 
 type Vehicle = { id: number; vehicleType: string; status: string; model: string; licensePlate: string; capacitySeats?: number };
 type RouteRow = { id: number; origin: string; destination: string; transportType: 'bus' | 'train'; distanceKm: number; durationMinutes: number; trainNumber?: string; departureTime: string; sourceUrl?: string };
-type Catalog = { routes: RouteRow[]; driver: { firstName: string; lastName: string } | null };
+type Catalog = { routes: RouteRow[] };
 type Proposal = { route: RouteRow; vehicle: Vehicle; departureAt: string; fare: number; driver: string | null };
 type CustomerTrip = {
   id: number; departurePoint: string; arrivalPoint: string; departure_point?: string; arrival_point?: string;
@@ -25,7 +25,7 @@ const riskPlaceNames = ['харків', 'запоріж', 'херсон', 'до�
 
 function useCustomerData() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [catalog, setCatalog] = useState<Catalog>({ routes: [], driver: null });
+  const [catalog, setCatalog] = useState<Catalog>({ routes: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   useEffect(() => {
@@ -168,7 +168,7 @@ export function CustomerTripsPage() {
       const vehicle = vehicles.filter((item) => item.vehicleType === route.transportType && (item.capacitySeats ?? 0) >= passengerCount).sort((a, b) => (a.capacitySeats ?? 0) - (b.capacitySeats ?? 0))[0];
       if (!vehicle) return [];
       const rate = route.transportType === 'train' ? 1.6 * (seatClasses.find((seat) => seat.value === seatClass)?.multiplier ?? 1) : 2.4;
-      return [{ route, vehicle, departureAt: localDateTime(travelDate, route.departureTime), fare: Math.round(route.distanceKm * passengerCount * rate * 100) / 100, driver: route.transportType === 'bus' && catalog.driver ? `${catalog.driver.firstName} ${catalog.driver.lastName}` : null }];
+      return [{ route, vehicle, departureAt: localDateTime(travelDate, route.departureTime), fare: Math.round(route.distanceKm * passengerCount * rate * 100) / 100, driver: null }];
     });
     setProposals(options);
     if (!options.length) setMessage(matched.length ? 'Немає доступного транспорту з достатньою кількістю місць.' : 'Маршруту для цих міст поки немає в каталозі. Оберіть міста зі списку або перевірте написання.');
@@ -223,6 +223,6 @@ export function CustomerTripsPage() {
       {message && !formOpen && <div className="customer-alert success">{message}</div>}
     </section>}
     {!proposals.length && !formOpen && !loading && <div className="panel customer-empty"><h2>Поки немає розрахованих рейсів</h2><p>Натисніть «Створити рейс», щоб побачити пропозиції для своєї поїздки.</p><button className="primary-button" onClick={() => setFormOpen(true)}>Створити рейс</button></div>}
-    <p className="customer-disclaimer">Для потягів номери й орієнтовні години імпортовано з публічних сторінок Укрзалізниці. Перед поїздкою звірте дані в <a href="https://booking.uz.gov.ua/schedule/" target="_blank" rel="noreferrer">офіційному розкладі</a>. Демо-тариф і наявність місць не підключені до УЗ.</p>
+    <p className="customer-disclaimer">Для потягів номери й орієнтовні години імпортовано з публічних сторінок Укрзалізниці. Перед поїздкою звірте дані в <a href="https://booking.uz.gov.ua/schedule/" target="_blank" rel="noreferrer">офіційному розкладі</a>. Вартість є орієнтовною, а наявність місць не синхронізується з УЗ.</p>
   </>;
 }

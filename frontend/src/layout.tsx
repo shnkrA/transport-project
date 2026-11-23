@@ -35,6 +35,8 @@ const dispatcherTitles: Record<string, string> = {
   '/dispatch/in-progress': 'Рейси у дорозі',
   '/dispatch/vehicles': 'Транспорт і ТО',
 };
+const driverNavigation = [{ label: 'Мої рейси', path: '/driver/trips', icon: '↗' }];
+const driverTitles: Record<string, string> = { '/driver/trips': 'Мої рейси' };
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -42,8 +44,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const currentUser = getCurrentUser();
   const isCustomer = currentUser?.role === 'user';
   const isDispatcher = currentUser?.role === 'dispatcher';
-  const title = (isCustomer ? customerTitles : isDispatcher ? dispatcherTitles : titles)[location.pathname] ?? 'Огляд';
-  const navigation = isCustomer ? customerNavigation : isDispatcher ? dispatcherNavigation : staffNavigation;
+  const isDriver = currentUser?.role === 'driver';
+  const title = (isCustomer ? customerTitles : isDispatcher ? dispatcherTitles : isDriver ? driverTitles : titles)[location.pathname] ?? 'Огляд';
+  const navigation = isCustomer ? customerNavigation : isDispatcher ? dispatcherNavigation : isDriver ? driverNavigation : staffNavigation;
 
   const logout = () => {
     localStorage.removeItem('accessToken');
