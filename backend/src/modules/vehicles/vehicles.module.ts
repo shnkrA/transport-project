@@ -6,11 +6,12 @@ import { VehiclesService } from './vehicles.service';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { DispatcherGuard } from '../auth/dispatcher.guard';
+import { RoleGuard } from '../auth/role.guard';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Vehicle]), AuthModule, UsersModule],
   controllers: [VehiclesController],
-  providers: [VehiclesService, DispatcherGuard],
+  providers: [VehiclesService, DispatcherGuard, RoleGuard],
   exports: [VehiclesService],
 })
 export class VehiclesModule {}

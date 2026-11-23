@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 const staff = [
   { role: 'admin', firstName: 'Анна', lastName: 'Шинкарь', email: 'admin@transit.demo', password: 'AdminTransit2026!' },
   { role: 'dispatcher', firstName: 'Олена', lastName: 'Кравець', email: 'dispatcher@transit.demo', password: 'DispatchTransit2026!' },
-  { role: 'logistician', firstName: 'Ігор', lastName: 'Мельник', email: 'logistics@transit.demo', password: 'LogisticsTransit2026!' },
+  { role: 'mechanic', firstName: 'Ігор', lastName: 'Мельник', email: 'mechanic@transit.demo', password: 'MechanicTransit2026!' },
   { role: 'driver', firstName: 'Олександр', lastName: 'Коваль', email: 'driver@transit.demo', password: 'DriverTransit2026!' },
   { role: 'driver', firstName: 'Ірина', lastName: 'Мельник', email: 'driver2@transit.demo', password: 'Driver2Transit2026!' },
   { role: 'driver', firstName: 'Сергій', lastName: 'Бондар', email: 'driver3@transit.demo', password: 'Driver3Transit2026!' },
@@ -20,7 +20,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
     const roles = [
       ['admin', 'Адміністратор'], ['dispatcher', 'Диспетчер'],
-      ['logistician', 'Логіст'], ['driver', 'Водій'], ['user', 'Клієнт'],
+      ['mechanic', 'Механік'], ['driver', 'Водій'], ['user', 'Клієнт'],
     ];
     for (const [name, description] of roles) {
       await this.dataSource.query(

@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, Headers, UnauthorizedException, ForbiddenException, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, Headers, UnauthorizedException, ForbiddenException, UseGuards, BadRequestException, Req } from '@nestjs/common';
 import { TripsService } from './trips.service';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { DispatcherGuard } from '../auth/dispatcher.guard';
+import { RoleGuard } from '../auth/role.guard';
 
 @ApiTags('Рейси')
 @Controller('trips')
@@ -38,6 +39,7 @@ export class TripsController {
   }
 
   @Get('driver/mine')
+  @UseGuards(RoleGuard)
   @ApiOperation({ summary: 'Отримати призначені рейси поточного водія' })
   async findDriverTrips(@Headers('authorization') authorization?: string): Promise<unknown> {
     const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : '';
@@ -50,6 +52,20 @@ export class TripsController {
     const role = await this.usersService.getRoleName(Number(payload.roleId));
     if (role !== 'driver') throw new ForbiddenException('Ця сторінка доступна водіям');
     return this.tripsService.findByDriver(driverId);
+  }
+
+  @Patch(':id/driver-status')
+  @UseGuards(RoleGuard)
+  driverStatus(@Param('id') id: string, @Body() data: { status: string }, @Req() request: any): Promise<unknown> {
+    if (!['in_progress', 'completed'].includes(data?.status ?? '')) throw new BadRequestException('Недійсний статус рейсу');
+    return this.tripsService.driverStatus(+id, request.user.id, data.status as 'in_progress' | 'completed');
+  }
+
+  @Post(':id/report')
+  @UseGuards(RoleGuard)
+  report(@Param('id') id: string, @Body() data: { type: string; message?: string }, @Req() request: any): Promise<unknown> {
+    if (!['breakdown', 'delay'].includes(data?.type ?? '')) throw new BadRequestException('Оберіть поломку або затримку');
+    return this.tripsService.createDriverReport(+id, request.user.id, data.type, data.message ?? '');
   }
 
   @Get('dispatch/board')

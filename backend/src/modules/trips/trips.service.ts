@@ -64,7 +64,7 @@ export class TripsService {
 
   getDispatchBoard(status: 'pending' | 'confirmed' | 'in_progress'): Promise<any[]> {
     return this.dataSource.query(
-      `SELECT t.*, v.vehicle_type AS "vehicleType", v.model AS "vehicleModel",
+      `SELECT t.*, t.route_distance_km AS "routeDistanceKm", v.vehicle_type AS "vehicleType", v.model AS "vehicleModel",
               v.license_plate AS "licensePlate", v.status AS "vehicleStatus",
               c.first_name AS "customerFirstName", c.last_name AS "customerLastName",
               d.first_name AS "driverFirstName", d.last_name AS "driverLastName"
@@ -151,6 +151,31 @@ export class TripsService {
     if (status === 'completed') await this.dataSource.query("UPDATE vehicles SET status = 'available', updated_at = NOW() WHERE id = $1 AND status = 'in_trip'", [trip.vehicleId]);
     if (status === 'cancelled' && trip.driverId) trip.driverId = undefined;
     return saved;
+  }
+
+  async driverStatus(id: number, driverId: number, status: 'in_progress' | 'completed'): Promise<any> {
+    const trip = await this.findOne(id);
+    if (Number(trip.driverId) !== driverId) throw new ConflictException('Цей рейс не призначений вам');
+    const expected = status === 'in_progress' ? 'confirmed' : 'in_progress';
+    if (trip.status !== expected) throw new ConflictException(`Не можна змінити статус рейсу з ${trip.status}`);
+    const vehicle = await this.dataSource.query('SELECT vehicle_type FROM vehicles WHERE id = $1', [trip.vehicleId]);
+    if (!vehicle[0] || vehicle[0].vehicle_type === 'train') throw new BadRequestException('Водій може керувати лише автобусними рейсами');
+    trip.status = status;
+    const saved = await this.tripsRepository.save(trip);
+    await this.dataSource.query('UPDATE vehicles SET status = $1, updated_at = NOW() WHERE id = $2', [status === 'in_progress' ? 'in_trip' : 'available', trip.vehicleId]);
+    return saved;
+  }
+
+  async createDriverReport(tripId: number, driverId: number, type: string, message: string): Promise<any> {
+    const trip = await this.findOne(tripId);
+    if (Number(trip.driverId) !== driverId || trip.status !== 'in_progress') throw new ConflictException('Повідомлення можна надіслати лише для свого рейсу в дорозі');
+    const [report] = await this.dataSource.query(
+      `INSERT INTO driver_reports (trip_id, vehicle_id, driver_id, type, message)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id, trip_id AS "tripId", vehicle_id AS "vehicleId", type, message, status, created_at AS "createdAt"`,
+      [tripId, trip.vehicleId, driverId, type, message.trim() || (type === 'breakdown' ? 'Потрібен огляд механіка' : 'Повідомлення про затримку')],
+    );
+    if (type === 'breakdown') await this.dataSource.query("UPDATE vehicles SET status = 'maintenance', updated_at = NOW() WHERE id = $1", [trip.vehicleId]);
+    return report;
   }
 
   async findAll(query?: any): Promise<any[]> {

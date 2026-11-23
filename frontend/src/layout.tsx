@@ -37,6 +37,8 @@ const dispatcherTitles: Record<string, string> = {
 };
 const driverNavigation = [{ label: 'Мої рейси', path: '/driver/trips', icon: '↗' }];
 const driverTitles: Record<string, string> = { '/driver/trips': 'Мої рейси' };
+const mechanicNavigation = [{ label: 'Транспорт і ремонти', path: '/mechanic/vehicles', icon: '⚙' }];
+const mechanicTitles: Record<string, string> = { '/mechanic/vehicles': 'Транспорт і ремонти' };
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -45,8 +47,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isCustomer = currentUser?.role === 'user';
   const isDispatcher = currentUser?.role === 'dispatcher';
   const isDriver = currentUser?.role === 'driver';
-  const title = (isCustomer ? customerTitles : isDispatcher ? dispatcherTitles : isDriver ? driverTitles : titles)[location.pathname] ?? 'Огляд';
-  const navigation = isCustomer ? customerNavigation : isDispatcher ? dispatcherNavigation : isDriver ? driverNavigation : staffNavigation;
+  const isMechanic = currentUser?.role === 'mechanic';
+  const title = (isCustomer ? customerTitles : isDispatcher ? dispatcherTitles : isDriver ? driverTitles : isMechanic ? mechanicTitles : titles)[location.pathname] ?? 'Огляд';
+  const navigation = isCustomer ? customerNavigation : isDispatcher ? dispatcherNavigation : isDriver ? driverNavigation : isMechanic ? mechanicNavigation : staffNavigation;
 
   const logout = () => {
     localStorage.removeItem('accessToken');
@@ -59,7 +62,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <aside className="sidebar">
         <NavLink className="brand" to="/dashboard" aria-label="На головну">
           <span className="brand-mark">Т</span>
-          <span><strong>ТРАНЗИТ</strong><small>СИСТЕМА КЕРУВАННЯ</small></span>
+          <span><strong>ТРАНЗИТ</strong></span>
         </NavLink>
         <div className="side-label">РОБОЧИЙ ПРОСТІР</div>
         <nav className="side-nav" aria-label="Головна навігація">
@@ -71,7 +74,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="help-card"><span className="help-dot" /><div><strong>Усе під контролем</strong><small>Система працює нормально</small></div></div>
           <div className="user-card"><div className="avatar">{getUserInitials(currentUser)}</div><div className="user-info"><strong>{currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Користувач'}</strong><small>{getRoleLabel(currentUser?.role)}</small></div><button className="logout-button" type="button" onClick={logout}>Вийти</button></div>
         </div>
       </aside>

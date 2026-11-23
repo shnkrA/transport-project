@@ -8,7 +8,6 @@ export type SessionUser = {
 const roleLabels: Record<string, string> = {
   admin: 'Адміністратор',
   dispatcher: 'Диспетчер',
-  logistician: 'Логіст',
   driver: 'Водій',
   user: 'Клієнт',
   mechanic: 'Механік',

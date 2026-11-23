@@ -1297,6 +1297,11 @@ tbody tr:last-child td {
 .dispatch-vehicle-card h2 { margin: 14px 0 6px; font-size: 17px; color: #2f405a; }
 .dispatch-vehicle-card>p { color: #8390a4; font-size: 11px; }
 .dispatch-vehicle-card .dispatch-status-field { margin-top: 17px; }
+.mechanic-report { margin-top: 14px; padding: 12px; border-radius: 9px; background: #fff6ed; color: #92501e; font-size: 12px; line-height: 1.5; }
+.mechanic-report p { margin: 6px 0; color: #8b97a9; }
+.mechanic-report .primary-button { min-height: 36px; margin-top: 8px; padding: 0 12px; }
+.vehicle-alert-icon { position: absolute; top: 15px; right: 13px; padding: 5px 8px; border-radius: 20px; background: #fff0d9; color: #a85c11; font-size: 11px; font-weight: 800; }
+.vehicle-report-note { color: #a85c11 !important; }
 .vehicle-state { position: absolute; top: 20px; right: 17px; padding: 6px 9px; border-radius: 15px; background: #e9f8f1; color: #16805d; font-size: 10px; font-weight: 700; }
 .vehicle-state.in_trip { background: #edf3ff; color: #3d66b7; }
 .vehicle-state.maintenance,.vehicle-state.out_of_service { background: #fff2dc; color: #926917; }

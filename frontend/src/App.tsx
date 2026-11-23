@@ -4,19 +4,22 @@ import { AppLayout } from './layout';
 import { AvailableTransportPage, CustomerDashboardPage, CustomerMyTripsPage, CustomerTripsPage } from './pages/customer';
 import { DispatchInProgressPage, DispatchPendingPage, DispatchVehiclesPage } from './pages/dispatcher';
 import { DriverTripsPage } from './pages/driver';
+import { MechanicVehiclesPage } from './pages/mechanic';
 import { getCurrentUser } from './services/session';
 
 function EntryRedirect() {
   const user = getCurrentUser();
-  return <Navigate to={!user ? '/register' : user.role === 'dispatcher' ? '/dispatch/pending' : user.role === 'driver' ? '/driver/trips' : '/dashboard'} replace />;
+  return <Navigate to={!user ? '/register' : user.role === 'dispatcher' ? '/dispatch/pending' : user.role === 'driver' ? '/driver/trips' : user.role === 'mechanic' ? '/mechanic/vehicles' : '/dashboard'} replace />;
 }
 
-function RoleRoute({ children, customerOnly = false, dispatcherOnly = false, driverOnly = false }: { children: JSX.Element; customerOnly?: boolean; dispatcherOnly?: boolean; driverOnly?: boolean }) {
+function RoleRoute({ children, customerOnly = false, dispatcherOnly = false, driverOnly = false, mechanicOnly = false }: { children: JSX.Element; customerOnly?: boolean; dispatcherOnly?: boolean; driverOnly?: boolean; mechanicOnly?: boolean }) {
   const user = getCurrentUser();
   if (!localStorage.getItem('accessToken') || !user) return <Navigate to="/register" replace />;
   if (customerOnly && user.role !== 'user') return <Navigate to="/dashboard" replace />;
   if (dispatcherOnly && user.role !== 'dispatcher') return <Navigate to="/dashboard" replace />;
   if (driverOnly && user.role !== 'driver') return <Navigate to="/dashboard" replace />;
+  if (mechanicOnly && user.role !== 'mechanic') return <Navigate to="/dashboard" replace />;
+  if (user.role === 'mechanic' && !mechanicOnly) return <Navigate to="/mechanic/vehicles" replace />;
   if (user.role === 'driver' && !driverOnly) return <Navigate to="/driver/trips" replace />;
   if (user.role === 'dispatcher' && !dispatcherOnly) return <Navigate to="/dispatch/pending" replace />;
   if (!customerOnly && user.role === 'user') return <Navigate to="/dashboard" replace />;
@@ -38,6 +41,7 @@ function App() {
         <Route path="/dispatch/in-progress" element={<RoleRoute dispatcherOnly><DispatchInProgressPage /></RoleRoute>} />
         <Route path="/dispatch/vehicles" element={<RoleRoute dispatcherOnly><DispatchVehiclesPage /></RoleRoute>} />
         <Route path="/driver/trips" element={<RoleRoute driverOnly><DriverTripsPage /></RoleRoute>} />
+        <Route path="/mechanic/vehicles" element={<RoleRoute mechanicOnly><MechanicVehiclesPage /></RoleRoute>} />
         <Route path="/calculate" element={<Navigate to="/trips?create=1" replace />} />
       </Route>
       <Route path="/" element={<EntryRedirect />} />
