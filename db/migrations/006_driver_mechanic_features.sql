@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS driver_reports (
   trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
   vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
   driver_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  type VARCHAR(20) NOT NULL CHECK (type IN ('breakdown', 'delay')),
+  type VARCHAR(20) NOT NULL CHECK (type = 'breakdown'),
   message TEXT NOT NULL DEFAULT '',
   status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved')),
   mechanic_notes TEXT,

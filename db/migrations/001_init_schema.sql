@@ -311,8 +311,6 @@ CREATE TABLE trip_checkpoints (
     trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
     checkpoint_id INTEGER NOT NULL REFERENCES route_checkpoints(id) ON DELETE RESTRICT,
     passed_at TIMESTAMP WITH TIME ZONE,
-    was_delayed BOOLEAN DEFAULT FALSE,
-    delay_minutes INTEGER,
     notes TEXT
 );
 
