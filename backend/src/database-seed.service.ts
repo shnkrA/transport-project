@@ -64,5 +64,65 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         [`Потяг № ${trainNumber}`, licensePlate],
       );
     }
+
+    const trucks = [
+      { model: 'Вантажівка MAN TGL', plate: 'CARGO-AA-1042', capacity: 3500 },
+      { model: 'Вантажівка Renault Master', plate: 'CARGO-KA-2086', capacity: 1500 },
+    ];
+    for (const truck of trucks) {
+      await this.dataSource.query(
+        `INSERT INTO vehicles (vehicle_type, status, model, license_plate, capacity_weight_kg)
+         VALUES ('truck', 'available', $1, $2, $3)
+         ON CONFLICT (license_plate) DO UPDATE
+         SET capacity_weight_kg = EXCLUDED.capacity_weight_kg`,
+        [truck.model, truck.plate, truck.capacity],
+      );
+    }
+
+    const [cargoVehicle] = await this.dataSource.query(
+      `SELECT id FROM vehicles
+       WHERE vehicle_type = 'truck' AND license_plate = 'CARGO-AA-1042'`,
+    );
+    const cargoSamples = [
+      {
+        marker: 'DEMO-CARGO-REQUEST-1',
+        customerName: 'ТОВ «Добрий врожай»',
+        origin: 'Київ',
+        destination: 'Житомир',
+        weight: 1200,
+        dimensions: '240 × 160 × 140 см',
+        cost: 1440,
+        days: 3,
+        notes: 'Палетований вантаж; DEMO-CARGO-REQUEST-1',
+      },
+      {
+        marker: 'DEMO-CARGO-REQUEST-2',
+        customerName: 'Майстерня «Дім і сад»',
+        origin: 'Київ',
+        destination: 'Чернігів',
+        weight: 800,
+        dimensions: '180 × 120 × 100 см',
+        cost: 960,
+        days: 5,
+        notes: 'Будівельні матеріали; DEMO-CARGO-REQUEST-2',
+      },
+    ];
+    for (const sample of cargoSamples) {
+      const [exists] = await this.dataSource.query(
+        'SELECT id FROM trips WHERE notes LIKE $1 LIMIT 1',
+        [`%${sample.marker}%`],
+      );
+      if (!exists) {
+        await this.dataSource.query(
+          `INSERT INTO trips
+             (customer_name, vehicle_id, departure_point, arrival_point, departure_time,
+              status, cost, notes, service_type, cargo_weight_kg, cargo_dimensions)
+           VALUES ($1, $2, $3, $4, (CURRENT_DATE + $5::int) + TIME '09:00',
+                   'pending', $6, $7, 'cargo', $8, $9)`,
+          [sample.customerName, cargoVehicle.id, sample.origin, sample.destination,
+            sample.days, sample.cost, sample.notes, sample.weight, sample.dimensions],
+        );
+      }
+    }
   }
 }

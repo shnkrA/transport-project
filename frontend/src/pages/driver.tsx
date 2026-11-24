@@ -4,6 +4,8 @@ import api from '../services/api';
 type DriverTrip = {
   id: number; status: string; departurePoint: string; arrivalPoint: string; departureTime?: string;
   passengerCount?: number; cost: number | string; notes?: string; routeStops?: string[];
+  serviceType?: string; service_type?: string; cargoWeightKg?: number | string; cargo_weight_kg?: number | string;
+  cargoDimensions?: string; cargo_dimensions?: string;
   routeDistanceKm?: number | string; vehicleModel: string; licensePlate: string; vehicleStatus: string;
 };
 const statusLabels: Record<string, string> = { pending: 'Очікує підтвердження', confirmed: 'Підтверджено', in_progress: 'У дорозі', completed: 'Завершено', cancelled: 'Скасовано' };
@@ -22,7 +24,10 @@ function downloadRoadSheet(trip: DriverTrip) {
   const distance = Number(trip.routeDistanceKm) || 0;
   const lines = [
     ['Маршрут', `${trip.departurePoint} → ${trip.arrivalPoint}`], ['Дата та час виїзду', tripDate(trip.departureTime)],
-    ['Транспорт', `${trip.vehicleModel} · ${trip.licensePlate}`], ['Пасажири', String(trip.passengerCount ?? '—')],
+    ['Транспорт', `${trip.vehicleModel} · ${trip.licensePlate}`],
+    ...((trip.serviceType ?? trip.service_type) === 'cargo'
+      ? [['Вантаж', `${trip.cargoWeightKg ?? trip.cargo_weight_kg ?? '—'} кг · ${trip.cargoDimensions ?? trip.cargo_dimensions ?? 'габарити не вказано'}`]]
+      : [['Пасажири', String(trip.passengerCount ?? '—')]]),
     ['Відстань за маршрутом', distance ? `${distance.toLocaleString('uk-UA')} км` : 'Не вказано'],
     ['Орієнтовне пальне', distance ? `${(distance * 0.25).toLocaleString('uk-UA', { maximumFractionDigits: 1 })} л (25 л/100 км)` : 'Не розраховано'],
     ['Вартість рейсу', `${Number(trip.cost).toLocaleString('uk-UA')} грн`],
@@ -69,7 +74,7 @@ export function DriverTripsPage() {
     {trips.map((trip) => <article className="panel dispatch-card" key={trip.id}>
       <div className="dispatch-card-top"><span className="trip-id">Рейс №{trip.id}</span><span className={`trip-status ${trip.status}`}>{statusLabels[trip.status] ?? trip.status}</span></div>
       <h2>{trip.departurePoint} <i>→</i> {trip.arrivalPoint}</h2>
-      <div className="dispatch-details"><span>Виїзд<strong>{tripDate(trip.departureTime)}</strong></span><span>Автобус<strong>{trip.vehicleModel} · {trip.licensePlate}</strong></span><span>Пасажири<strong>{trip.passengerCount ?? '—'}</strong></span><span>Стан транспорту<strong>{vehicleStatusLabel(trip.vehicleStatus)}</strong></span></div>
+      <div className="dispatch-details"><span>Виїзд<strong>{tripDate(trip.departureTime)}</strong></span><span>{(trip.serviceType ?? trip.service_type) === 'cargo' ? 'Вантажівка' : 'Автобус'}<strong>{trip.vehicleModel} · {trip.licensePlate}</strong></span>{(trip.serviceType ?? trip.service_type) === 'cargo' ? <span>Вантаж<strong>{trip.cargoWeightKg ?? trip.cargo_weight_kg ?? '—'} кг · {trip.cargoDimensions ?? trip.cargo_dimensions ?? 'габарити не вказано'}</strong></span> : <span>Пасажири<strong>{trip.passengerCount ?? '—'}</strong></span>}<span>Стан транспорту<strong>{vehicleStatusLabel(trip.vehicleStatus)}</strong></span></div>
       {trip.status === 'confirmed' && <p className="dispatch-note">Диспетчер підтвердив цей рейс. Можна розпочинати поїздку.</p>}
       {!!trip.routeStops?.length && <p className="dispatch-note">Зупинки: {trip.routeStops.join(' · ')}</p>}
       {trip.status !== 'confirmed' && !trip.routeStops?.length && trip.notes && !trip.notes.includes('Попередня пропозиція рейсу') && <p className="dispatch-note">{trip.notes}</p>}

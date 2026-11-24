@@ -1206,6 +1206,7 @@ tbody tr:last-child td {
 .customer-field { display: grid; gap: 7px; margin: 15px 0; }
 .customer-field label { color: #47556c; font-size: 12px; font-weight: 700; }
 .customer-field input,.customer-field select { width: 100%; min-height: 43px; padding: 0 12px; border: 1px solid #e1e7f0; border-radius: 9px; background: #fff; color: #26354c; outline: none; }
+.customer-field textarea { width: 100%; min-height: 90px; padding: 11px 12px; border: 1px solid #e1e7f0; border-radius: 9px; background: #fff; color: #26354c; font: inherit; resize: vertical; }
 .customer-field select[multiple] { padding: 7px 10px; }
 .customer-field input:focus,.customer-field select:focus { border-color: #5182e8; box-shadow: 0 0 0 3px #5182e81a; }
 .customer-field small { color: #8793a5; font-size: 11px; line-height: 1.5; }

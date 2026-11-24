@@ -35,6 +35,15 @@ export class Trip {
   @Column({ name: 'passenger_count', nullable: true })
   passengerCount?: number;
 
+  @Column({ name: 'service_type', default: 'passenger' })
+  serviceType: string;
+
+  @Column({ name: 'cargo_weight_kg', type: 'decimal', precision: 10, scale: 2, nullable: true })
+  cargoWeightKg?: number;
+
+  @Column({ name: 'cargo_dimensions', nullable: true })
+  cargoDimensions?: string;
+
   @Column({ name: 'route_stops', type: 'jsonb', default: () => "'[]'::jsonb" })
   routeStops: string[];
 

@@ -7,6 +7,8 @@ type DispatchTrip = {
   customerFirstName?: string; customerLastName?: string; departurePoint?: string; departure_point?: string;
   arrivalPoint?: string; arrival_point?: string; departureTime?: string; departure_time?: string;
   passengerCount?: number; passenger_count?: number; cost: number | string; notes?: string;
+  serviceType?: string; service_type?: string; cargoWeightKg?: number | string; cargo_weight_kg?: number | string;
+  cargoDimensions?: string; cargo_dimensions?: string;
   routeStops?: string[]; route_stops?: string[]; seatType?: string; seat_type?: string; seatNumbers?: number[]; seat_numbers?: number[];
   vehicleId?: number; vehicle_id?: number; vehicleType?: string; vehicle_type?: string; vehicleModel?: string; vehicle_model?: string;
   licensePlate?: string; vehicleStatus?: string; driverId?: number; driver_id?: number;
@@ -88,9 +90,9 @@ export function DispatchPendingPage() {
       return <article className="panel dispatch-card" key={trip.id}>
         <div className="dispatch-card-top"><span className="trip-id">Заявка №{trip.id}</span><span className="trip-status">{statusLabels[trip.status] ?? trip.status}</span></div>
         <h2>{from} <i>→</i> {to}</h2>
-        <div className="dispatch-details"><span>Клієнт<strong>{customer}</strong></span><span>Виїзд<strong>{tripDate(date)}</strong></span><span>Пасажири<strong>{trip.passengerCount ?? trip.passenger_count ?? '—'}</strong></span><span>Вартість<strong>{Number(trip.cost).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</strong></span></div>
+        <div className="dispatch-details"><span>Клієнт<strong>{customer}</strong></span><span>Виїзд<strong>{tripDate(date)}</strong></span>{(trip.serviceType ?? trip.service_type) === 'cargo' ? <span>Вантаж<strong>{trip.cargoWeightKg ?? trip.cargo_weight_kg ?? '—'} кг · {trip.cargoDimensions ?? trip.cargo_dimensions ?? 'габарити не вказано'}</strong></span> : <span>Пасажири<strong>{trip.passengerCount ?? trip.passenger_count ?? '—'}</strong></span>}<span>Вартість<strong>{Number(trip.cost).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</strong></span></div>
         {stops.length > 0 && <p className="dispatch-note">Зупинки: {stops.join(' · ')}</p>}
-        <p className="dispatch-note">{isTrain ? `Потяг № ${trainNumber ?? '—'} · ${trip.seatType ?? trip.seat_type ?? ''} · місця ${seats.join(', ') || 'не вибрано'}` : `Автобус: ${trip.vehicleModel ?? trip.vehicle_model ?? '—'} · ${trip.licensePlate ?? ''}`}</p>
+        <p className="dispatch-note">{isTrain ? `Потяг № ${trainNumber ?? '—'} · ${trip.seatType ?? trip.seat_type ?? ''} · місця ${seats.join(', ') || 'не вибрано'}` : `${(trip.serviceType ?? trip.service_type) === 'cargo' ? 'Вантажівка' : 'Автобус'}: ${trip.vehicleModel ?? trip.vehicle_model ?? '—'} · ${trip.licensePlate ?? ''}`}</p>
         <div className="dispatch-actions">{!isTrain && <label className="dispatch-driver-field">Водій<select value={selections[trip.id] ?? trip.driverId ?? trip.driver_id ?? ''} onChange={(event) => setSelections((current) => ({ ...current, [trip.id]: Number(event.target.value) }))}><option value="">Оберіть водія</option>{drivers.map((driver) => <option value={driver.id} key={driver.id} disabled={driver.inTrip}>{driver.firstName} {driver.lastName}{driver.inTrip ? ' · у рейсі' : ''}</option>)}</select></label>}
           <button className="primary-button" disabled={busy === trip.id} onClick={() => void dispatch(trip, 'confirmed')}>{busy === trip.id ? 'Зберігаємо…' : isTrain ? 'Підтвердити рейс' : 'Призначити й підтвердити'}</button><button className="dispatch-reject" disabled={busy === trip.id} onClick={() => void dispatch(trip, 'cancelled')}>Відхилити</button>
         </div>

@@ -26,6 +26,9 @@ export class Vehicle {
   @Column({ name: 'capacity_seats', nullable: true })
   capacitySeats?: number;
 
+  @Column({ name: 'capacity_weight_kg', type: 'decimal', precision: 10, scale: 2, nullable: true })
+  capacityWeightKg?: number;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

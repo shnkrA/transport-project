@@ -5,6 +5,7 @@ import { AvailableTransportPage, CustomerDashboardPage, CustomerMyTripsPage, Cus
 import { DispatchInProgressPage, DispatchPendingPage, DispatchVehiclesPage } from './pages/dispatcher';
 import { DriverTripsPage } from './pages/driver';
 import { MechanicVehiclesPage } from './pages/mechanic';
+import { CustomerCargoPage } from './pages/cargo';
 import { getCurrentUser } from './services/session';
 
 function EntryRedirect() {
@@ -37,6 +38,7 @@ function App() {
         <Route path="/my-trips" element={<RoleRoute customerOnly><CustomerMyTripsPage /></RoleRoute>} />
         <Route path="/vehicles" element={<RoleRoute><VehiclesPage /></RoleRoute>} />
         <Route path="/available-transport" element={<RoleRoute customerOnly><AvailableTransportPage /></RoleRoute>} />
+        <Route path="/cargo" element={<RoleRoute customerOnly><CustomerCargoPage /></RoleRoute>} />
         <Route path="/dispatch/pending" element={<RoleRoute dispatcherOnly><DispatchPendingPage /></RoleRoute>} />
         <Route path="/dispatch/in-progress" element={<RoleRoute dispatcherOnly><DispatchInProgressPage /></RoleRoute>} />
         <Route path="/dispatch/vehicles" element={<RoleRoute dispatcherOnly><DispatchVehiclesPage /></RoleRoute>} />

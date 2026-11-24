@@ -18,12 +18,14 @@ const customerNavigation = [
   { label: 'Огляд', path: '/dashboard', icon: '◫' },
   { label: 'Доступний транспорт', path: '/available-transport', icon: '▰' },
   { label: 'Рейси', path: '/trips', icon: '↗' },
+  { label: 'Вантажні перевезення', path: '/cargo', icon: '▣' },
   { label: 'Мої рейси', path: '/my-trips', icon: '▤' },
 ];
 const customerTitles: Record<string, string> = {
   '/dashboard': 'Огляд',
   '/available-transport': 'Доступний транспорт',
   '/trips': 'Рейси',
+  '/cargo': 'Вантажні перевезення',
   '/my-trips': 'Мої рейси',
 };
 const dispatcherNavigation = [

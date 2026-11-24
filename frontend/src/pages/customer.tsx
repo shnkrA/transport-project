@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { getCurrentUser } from '../services/session';
 
-type Vehicle = { id: number; vehicleType: string; status: string; model: string; licensePlate: string; capacitySeats?: number };
+type Vehicle = { id: number; vehicleType: string; status: string; model: string; licensePlate: string; capacitySeats?: number; capacityWeightKg?: number | string };
 type RouteRow = { id: number; origin: string; destination: string; transportType: 'bus' | 'train'; distanceKm: number; durationMinutes: number; trainNumber?: string; departureTime: string; sourceUrl?: string };
 type Catalog = { routes: RouteRow[] };
 type Proposal = { route: RouteRow; vehicle: Vehicle; departureAt: string; fare: number; driver: string | null };
@@ -13,7 +13,9 @@ type CustomerTrip = {
   vehicleModel?: string; vehicle_model?: string; cost: string | number; status: string;
   passengerCount?: number; passenger_count?: number; routeStops?: string[]; route_stops?: string[];
   seatType?: string; seat_type?: string; seatNumbers?: number[]; seat_numbers?: number[];
-  notes?: string; trainNumber?: string;
+  notes?: string; trainNumber?: string; serviceType?: string; service_type?: string;
+  cargoWeightKg?: number | string; cargo_weight_kg?: number | string;
+  cargoDimensions?: string; cargo_dimensions?: string;
 };
 
 const seatClasses = [
@@ -117,7 +119,7 @@ export function CustomerMyTripsPage() {
         <div className="my-trip-top"><span className="trip-id">Рейс №{trip.id}</span><span className={`trip-status ${trip.status}`}>{status}</span></div>
         <h2>{origin} <i>→</i> {destination}</h2>
         {stops.length > 0 && <p className="my-trip-stops">Зупинки: {stops.join(' · ')}</p>}
-        <div className="my-trip-meta"><span>Дата та час<strong>{departure ? formatDateTime(departure) : 'Не вказано'}</strong></span><span>{mode === 'train' ? 'Потяг' : 'Транспорт'}<strong>{mode === 'train' ? `№ ${trainNumber || '—'}` : model ?? 'Автобус'}</strong></span>{mode === 'train' && <span>Місця<strong>{seats.length ? `${seats.join(', ')} · ${trip.seatType ?? trip.seat_type ?? ''}` : 'Не вказано'}</strong></span>}<span>Пасажири<strong>{trip.passengerCount ?? trip.passenger_count ?? '—'}</strong></span><span>Вартість<strong>{Number(trip.cost).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</strong></span></div>
+        <div className="my-trip-meta"><span>Дата та час<strong>{departure ? formatDateTime(departure) : 'Не вказано'}</strong></span><span>{mode === 'train' ? 'Потяг' : (trip.serviceType ?? trip.service_type) === 'cargo' ? 'Вантажівка' : 'Транспорт'}<strong>{mode === 'train' ? `№ ${trainNumber || '—'}` : model ?? 'Автобус'}</strong></span>{mode === 'train' && <span>Місця<strong>{seats.length ? `${seats.join(', ')} · ${trip.seatType ?? trip.seat_type ?? ''}` : 'Не вказано'}</strong></span>}{(trip.serviceType ?? trip.service_type) === 'cargo' ? <><span>Вантаж<strong>{trip.cargoWeightKg ?? trip.cargo_weight_kg ?? '—'} кг</strong></span><span>Габарити<strong>{trip.cargoDimensions ?? trip.cargo_dimensions ?? '—'}</strong></span></> : <span>Пасажири<strong>{trip.passengerCount ?? trip.passenger_count ?? '—'}</strong></span>}<span>Вартість<strong>{Number(trip.cost).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</strong></span></div>
       </article>;
     })}
   </>;
@@ -131,8 +133,8 @@ export function AvailableTransportPage() {
     {error && <div className="customer-alert danger">{error}</div>}
     {!loading && !error && !vehicles.length && <div className="panel customer-empty">Наразі доступного транспорту немає.</div>}
     <section className="customer-vehicle-grid">{vehicles.map((vehicle) => <article className="panel customer-vehicle-card" key={vehicle.id}>
-      <div className={`customer-vehicle-icon ${vehicle.vehicleType === 'train' ? 'train' : ''}`}>{vehicle.vehicleType === 'train' ? '🚆' : '🚌'}</div><span className="customer-available"><i /> Доступний</span><h2>{vehicle.model}</h2>
-      <p>{vehicle.vehicleType === 'train' ? 'Вагон' : 'Автобус'} · до {vehicle.capacitySeats ?? '—'} пасажирів</p><Link to="/trips?create=1" className="text-link">Розрахувати поїздку ↗</Link>
+      <div className={`customer-vehicle-icon ${vehicle.vehicleType === 'train' ? 'train' : ''}`}>{vehicle.vehicleType === 'train' ? '🚆' : vehicle.vehicleType === 'truck' ? '🚚' : '🚌'}</div><span className="customer-available"><i /> Доступний</span><h2>{vehicle.model}</h2>
+      <p>{vehicle.vehicleType === 'train' ? 'Вагон' : vehicle.vehicleType === 'truck' ? `Вантажівка · до ${Number(vehicle.capacityWeightKg ?? 0).toLocaleString('uk-UA')} кг` : `Автобус · до ${vehicle.capacitySeats ?? '—'} пасажирів`}</p>{vehicle.vehicleType === 'truck' ? <Link to="/cargo" className="text-link">Замовити вантажне перевезення →</Link> : <Link to="/trips?create=1" className="text-link">Розрахувати поїздку ↗</Link>}
     </article>)}</section>
     <p className="customer-disclaimer">Реальний розклад, наявність квитків і зайняті місця не синхронізуються з Укрзалізницею.</p>
   </>;
