@@ -73,10 +73,10 @@ export function DispatchPendingPage() {
   };
 
   return <>
-    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · ЧЕРГА ЗАЯВОК</div><h1>Рейси на підтвердження</h1><p>Перевірте дані заявки, за потреби призначте водія та підтвердьте рейс.</p></div></div>
+    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · ЧЕРГА ЗАМОВЛЕНЬ</div><h1>Рейси на підтвердження</h1><p>Перевірте дані замовлення, за потреби призначте водія та підтвердьте рейс.</p></div></div>
     {error && <div className="customer-alert danger">{error}</div>}
     {loading && <div className="panel customer-empty">Завантаження заявок…</div>}
-    {!loading && !error && trips.length === 0 && <div className="panel customer-empty"><h2>Немає рейсів на підтвердження</h2><p>Нові заявки клієнтів з’являться тут.</p></div>}
+    {!loading && !error && trips.length === 0 && <div className="panel customer-empty"><h2>Немає рейсів на підтвердження</h2><p>Нові замовлення клієнтів з’являться тут.</p></div>}
     {trips.map((trip) => {
       const vehicleType = trip.vehicleType ?? trip.vehicle_type ?? '';
       const isTrain = vehicleType === 'train';
@@ -88,7 +88,7 @@ export function DispatchPendingPage() {
       const seats = trip.seatNumbers ?? trip.seat_numbers ?? [];
       let trainNumber = trip.notes?.match(/потяга з каталогу: ([^.]+)/i)?.[1];
       return <article className="panel dispatch-card" key={trip.id}>
-        <div className="dispatch-card-top"><span className="trip-id">Заявка №{trip.id}</span><span className="trip-status">{statusLabels[trip.status] ?? trip.status}</span></div>
+        <div className="dispatch-card-top"><span className="trip-id">Замовлення №{trip.id}</span><span className="trip-status">{statusLabels[trip.status] ?? trip.status}</span></div>
         <h2>{from} <i>→</i> {to}</h2>
         <div className="dispatch-details"><span>Клієнт<strong>{customer}</strong></span><span>Виїзд<strong>{tripDate(date)}</strong></span>{(trip.serviceType ?? trip.service_type) === 'cargo' ? <span>Вантаж<strong>{trip.cargoWeightKg ?? trip.cargo_weight_kg ?? '—'} кг · {trip.cargoDimensions ?? trip.cargo_dimensions ?? 'габарити не вказано'}</strong></span> : <span>Пасажири<strong>{trip.passengerCount ?? trip.passenger_count ?? '—'}</strong></span>}<span>Вартість<strong>{Number(trip.cost).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</strong></span></div>
         {stops.length > 0 && <p className="dispatch-note">Зупинки: {stops.join(' · ')}</p>}

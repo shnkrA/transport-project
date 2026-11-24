@@ -103,7 +103,7 @@ export function CustomerMyTripsPage() {
     </div>
     {loading && <div className="panel customer-empty">Завантажуємо ваші рейси…</div>}
     {error && <div className="customer-alert danger">{error}</div>}
-    {!loading && !error && shownTrips.length === 0 && <div className="panel customer-empty"><h2>{filter === 'past' ? 'Минулі рейси з’являться тут' : 'Майбутніх рейсів поки немає'}</h2><p>Створені заявки залишатимуться в історії після поїздки.</p>{filter !== 'past' && <Link to="/trips?create=1" className="primary-button">Знайти рейс</Link>}</div>}
+    {!loading && !error && shownTrips.length === 0 && <div className="panel customer-empty"><h2>{filter === 'past' ? 'Минулі рейси з’являться тут' : 'Майбутніх рейсів поки немає'}</h2><p>Створені замовлення залишатимуться в історії після поїздки.</p>{filter !== 'past' && <Link to="/trips?create=1" className="primary-button">Знайти рейс</Link>}</div>}
     {!loading && shownTrips.map((trip) => {
       const origin = trip.departurePoint ?? trip.departure_point ?? '—';
       const destination = trip.arrivalPoint ?? trip.arrival_point ?? '—';
@@ -193,9 +193,9 @@ export function CustomerTripsPage() {
         seatNumbers: proposal.route.transportType === 'train' ? seatNumbers[proposal.vehicle.id].map(Number) : null,
         notes: proposal.route.transportType === 'train' ? `Номер потяга з каталогу: ${proposal.route.trainNumber}. Пропозиція потребує підтвердження.` : 'Попередня пропозиція рейсу; потрібне підтвердження диспетчера.',
       });
-      setMessage('Заявку на рейс надіслано. Очікуйте підтвердження диспетчера.');
+      setMessage('Замовлення на рейс надіслано. Очікуйте підтвердження диспетчера.');
     } catch (reason: any) {
-      setMessage(reason?.response?.data?.message ?? 'Не вдалося надіслати заявку. Перевірте з’єднання з сервером.');
+      setMessage(reason?.response?.data?.message ?? 'Не вдалося надіслати замовлення. Перевірте з’єднання з сервером.');
     } finally { setBusyVehicle(null); }
   };
 
@@ -211,7 +211,7 @@ export function CustomerTripsPage() {
         <div className="customer-field"><label htmlFor="trip-passengers">Пасажири</label><input id="trip-passengers" type="number" min="1" max="54" value={passengers} onChange={(event) => setPassengers(event.target.value)} required /></div>
       </div>
       <button className="primary-button customer-submit" type="submit" disabled={loading || !catalog.routes.length}>{loading ? 'Завантаження маршрутів…' : 'Розрахувати рейс'}</button>
-      {message && <div className={`customer-alert ${message.startsWith('Заявку') ? 'success' : 'info'}`}>{message}</div>}
+      {message && <div className={`customer-alert ${message.startsWith('Замовлення') ? 'success' : 'info'}`}>{message}</div>}
     </form>}
     {isRiskRoute && <div className="customer-alert warning"><strong>Рейс може бути небезпечним, можливі зміни маршруту або скасування.</strong><span>Указаний напрямок проходить через Харківську, Запорізьку чи іншу область, де до переліку внесено окремі громади. Перевірте саме населений пункт і актуальну ситуацію перед поїздкою у <a href="https://dp-reintegration.gov.ua/?p=2371" target="_blank" rel="noreferrer">державному переліку</a>. Перелік не є оперативним попередженням про повітряну тривогу.</span></div>}
     {proposals.length > 0 && <section className="customer-proposals"><div className="panel-heading"><div><h2>Пропоновані рейси</h2><span>{origin} → {destination} · {travelDate}</span></div><span className="step-number">{proposals.length}</span></div>
