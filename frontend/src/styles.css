@@ -1,7 +1,7 @@
 :root {
-  font-family: 'Tektur',sans-serif;
+  font-family: 'Tektur', sans-serif;
   color: #162033;
-  background: #f5f7fb;
+  background: #f8fafc;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   font-optical-sizing: auto;
@@ -21,7 +21,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f5f7fb
+  background: #f8fafc
 }
 button,input {
   font: inherit
@@ -1314,3 +1314,14 @@ tbody tr:last-child td {
 @media (max-width: 1000px) { .customer-search-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 700px) { .customer-home-grid { grid-template-columns: 1fr; } .customer-home-card { min-height: 0; padding: 22px; } .customer-search-fields { grid-template-columns: 1fr; } .proposal-details { grid-template-columns: 1fr; } .proposal-actions { align-items: stretch; flex-direction: column; } .proposal-actions .primary-button { width: 100%; } .customer-search-form { padding: 16px; } }
 @media (max-width: 800px) { .customer-booking-grid { grid-template-columns: 1fr; } }
+
+/* Shared, quieter interface styling */
+.page-heading > div > .eyebrow { display: none; }
+.page-heading h1 { margin-top: 0; font-weight: 650; letter-spacing: -.45px; }
+.topbar-title { color: #26354c; font-size: 14px; font-weight: 650; }
+.metric-card,.panel,.customer-home-card { border-color: #e5eaf1; border-radius: 8px; box-shadow: none; }
+.brand-mark { border-radius: 8px; box-shadow: none; }
+.nav-link { border-radius: 6px; }
+.side-nav { margin-top: 34px; gap: 10px; }
+.primary-button { border-radius: 6px; box-shadow: none; }
+.filter-button,.logout-button,.dispatch-reject { border-radius: 6px; }

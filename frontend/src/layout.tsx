@@ -64,7 +64,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <span className="brand-mark">Т</span>
           <span><strong>ТРАНЗИТ</strong></span>
         </NavLink>
-        <div className="side-label">РОБОЧИЙ ПРОСТІР</div>
         <nav className="side-nav" aria-label="Головна навігація">
           {navigation.map((item) => (
             <NavLink key={item.path} to={item.path} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
@@ -80,7 +79,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       <main className="main-area">
         <header className="topbar">
-          <div className="crumb"><span>Транспортне підприємство</span><b>/</b><strong>{title}</strong></div>
+          <strong className="topbar-title">{title}</strong>
           <div className="top-actions">
             <div className="top-avatar">{getUserInitials(currentUser)}</div>
           </div>

@@ -120,7 +120,6 @@ export function CustomerMyTripsPage() {
         <div className="my-trip-meta"><span>Дата та час<strong>{departure ? formatDateTime(departure) : 'Не вказано'}</strong></span><span>{mode === 'train' ? 'Потяг' : 'Транспорт'}<strong>{mode === 'train' ? `№ ${trainNumber || '—'}` : model ?? 'Автобус'}</strong></span>{mode === 'train' && <span>Місця<strong>{seats.length ? `${seats.join(', ')} · ${trip.seatType ?? trip.seat_type ?? ''}` : 'Не вказано'}</strong></span>}<span>Пасажири<strong>{trip.passengerCount ?? trip.passenger_count ?? '—'}</strong></span><span>Вартість<strong>{Number(trip.cost).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</strong></span></div>
       </article>;
     })}
-    <p className="customer-disclaimer">Історія завантажується з бази даних за вашим обліковим записом і зберігає як майбутні, так і завершені рейси.</p>
   </>;
 }
 

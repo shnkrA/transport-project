@@ -6,11 +6,11 @@ const staff = [
   { role: 'admin', firstName: 'Анна', lastName: 'Шинкарь', email: 'admin@transit.demo', password: 'AdminTransit2026!' },
   { role: 'dispatcher', firstName: 'Олена', lastName: 'Кравець', email: 'dispatcher@transit.demo', password: 'DispatchTransit2026!' },
   { role: 'mechanic', firstName: 'Ігор', lastName: 'Мельник', email: 'mechanic@transit.demo', password: 'MechanicTransit2026!' },
-  { role: 'driver', firstName: 'Олександр', lastName: 'Коваль', email: 'driver@transit.demo', password: 'DriverTransit2026!' },
+  { role: 'driver', firstName: 'Олександр', lastName: 'Коваль', email: 'oleksandr@transit.demo', password: 'DriverTransit2026!' },
   { role: 'driver', firstName: 'Ірина', lastName: 'Мельник', email: 'iryna@transit.demo', password: 'Driver2Transit2026!' },
-  { role: 'driver', firstName: 'Сергій', lastName: 'Бондар', email: 'driver3@transit.demo', password: 'Driver3Transit2026!' },
-  { role: 'driver', firstName: 'Марія', lastName: 'Романюк', email: 'driver4@transit.demo', password: 'Driver4Transit2026!' },
-  { role: 'driver', firstName: 'Андрій', lastName: 'Ткачук', email: 'driver5@transit.demo', password: 'Driver5Transit2026!' },
+  { role: 'driver', firstName: 'Сергій', lastName: 'Бондар', email: 'serhii@transit.demo', password: 'Driver3Transit2026!' },
+  { role: 'driver', firstName: 'Марія', lastName: 'Романюк', email: 'maria@transit.demo', password: 'Driver4Transit2026!' },
+  { role: 'driver', firstName: 'Андрій', lastName: 'Ткачук', email: 'andrii@transit.demo', password: 'Driver5Transit2026!' },
 ];
 
 @Injectable()
@@ -31,13 +31,15 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     for (const account of staff) {
       const exists = await this.dataSource.query('SELECT id FROM users WHERE email = $1', [account.email]);
       if (exists.length) continue;
-      if (account.email === 'iryna@transit.demo') {
-        const legacyIryna = await this.dataSource.query(
-          'SELECT id FROM users WHERE email = $1 AND first_name = $2 AND last_name = $3',
-          ['driver2@transit.demo', account.firstName, account.lastName],
+      if (account.role === 'driver') {
+        const existingDriver = await this.dataSource.query(
+          `SELECT u.id FROM users u JOIN roles r ON r.id = u.role_id
+           WHERE r.name = 'driver' AND lower(u.first_name) = lower($1) AND lower(u.last_name) = lower($2)
+           ORDER BY u.id LIMIT 1`,
+          [account.firstName, account.lastName],
         );
-        if (legacyIryna.length) {
-          await this.dataSource.query('UPDATE users SET email = $1 WHERE id = $2', [account.email, legacyIryna[0].id]);
+        if (existingDriver.length) {
+          await this.dataSource.query('UPDATE users SET email = $1 WHERE id = $2', [account.email, existingDriver[0].id]);
           continue;
         }
       }

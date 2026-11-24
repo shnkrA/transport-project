@@ -8,6 +8,9 @@ type DriverTrip = {
 };
 const statusLabels: Record<string, string> = { pending: 'Очікує підтвердження', confirmed: 'Підтверджено', in_progress: 'У дорозі', completed: 'Завершено', cancelled: 'Скасовано' };
 function tripDate(value?: string) { return value ? new Intl.DateTimeFormat('uk-UA', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : 'Час не вказано'; }
+function vehicleStatusLabel(value: string) {
+  return ({ available: 'Доступний', in_trip: 'У дорозі', maintenance: 'На ТО', out_of_service: 'Не експлуатується' } as Record<string, string>)[value] ?? value;
+}
 
 function downloadRoadSheet(trip: DriverTrip) {
   const canvas = document.createElement('canvas'); canvas.width = 1240; canvas.height = 1754;
@@ -23,7 +26,6 @@ function downloadRoadSheet(trip: DriverTrip) {
     ['Відстань за маршрутом', distance ? `${distance.toLocaleString('uk-UA')} км` : 'Не вказано'],
     ['Орієнтовне пальне', distance ? `${(distance * 0.25).toLocaleString('uk-UA', { maximumFractionDigits: 1 })} л (25 л/100 км)` : 'Не розраховано'],
     ['Вартість рейсу', `${Number(trip.cost).toLocaleString('uk-UA')} грн`],
-    ['Зупинки', trip.routeStops?.join(', ') || 'Не вказано'], ['Примітки', trip.notes || '—'],
   ];
   let y = 310;
   for (const [label, value] of lines) {
@@ -61,13 +63,13 @@ export function DriverTripsPage() {
   const updateStatus = async (trip: DriverTrip, status: string) => { setBusy(trip.id); setError(''); try { await api.patch(`/trips/${trip.id}/driver-status`, { status }); await load(); } catch (reason: any) { setError(reason?.response?.data?.message ?? 'Не вдалося оновити рейс.'); } finally { setBusy(null); } };
   const report = async (trip: DriverTrip, type: 'breakdown' | 'delay') => { const message = window.prompt(type === 'breakdown' ? 'Що саме зламалося?' : 'Опишіть затримку:'); if (message === null) return; setBusy(trip.id); setError(''); try { await api.post(`/trips/${trip.id}/report`, { type, message }); await load(); } catch (reason: any) { setError(reason?.response?.data?.message ?? 'Не вдалося надіслати повідомлення.'); } finally { setBusy(null); } };
   return <>
-    <div className="page-heading"><div><div className="eyebrow">КАБІНЕТ ВОДІЯ</div><h1>Мої рейси</h1><p>Призначені диспетчером автобусні рейси та дорожні листи.</p></div><button className="filter-button" onClick={() => void load()}>↻ Оновити</button></div>
+    <div className="page-heading"><div><div className="eyebrow">КАБІНЕТ ВОДІЯ</div><h1>Мої рейси</h1><p>Призначені диспетчером автобусні рейси та дорожні листи.</p></div></div>
     {error && <div className="customer-alert danger">{error}</div>}{loading && <div className="panel customer-empty">Завантаження рейсів…</div>}
     {!loading && !error && trips.length === 0 && <div className="panel customer-empty"><h2>Призначених рейсів поки немає</h2><p>Коли диспетчер призначить вам рейс, він з’явиться тут.</p></div>}
     {trips.map((trip) => <article className="panel dispatch-card" key={trip.id}>
       <div className="dispatch-card-top"><span className="trip-id">Рейс №{trip.id}</span><span className={`trip-status ${trip.status}`}>{statusLabels[trip.status] ?? trip.status}</span></div>
       <h2>{trip.departurePoint} <i>→</i> {trip.arrivalPoint}</h2>
-      <div className="dispatch-details"><span>Виїзд<strong>{tripDate(trip.departureTime)}</strong></span><span>Автобус<strong>{trip.vehicleModel} · {trip.licensePlate}</strong></span><span>Пасажири<strong>{trip.passengerCount ?? '—'}</strong></span><span>Стан транспорту<strong>{trip.vehicleStatus}</strong></span></div>
+      <div className="dispatch-details"><span>Виїзд<strong>{tripDate(trip.departureTime)}</strong></span><span>Автобус<strong>{trip.vehicleModel} · {trip.licensePlate}</strong></span><span>Пасажири<strong>{trip.passengerCount ?? '—'}</strong></span><span>Стан транспорту<strong>{vehicleStatusLabel(trip.vehicleStatus)}</strong></span></div>
       {(trip.routeStops?.length || trip.notes) && <p className="dispatch-note">{trip.routeStops?.length ? `Зупинки: ${trip.routeStops.join(' · ')}` : trip.notes}</p>}
       <div className="dispatch-actions"><button className="dispatch-reject" onClick={() => downloadRoadSheet(trip)}>Завантажити дорожній лист PDF</button>
         {trip.status === 'confirmed' && <button className="primary-button" disabled={busy === trip.id} onClick={() => void updateStatus(trip, 'in_progress')}>Почати рейс</button>}
