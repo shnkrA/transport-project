@@ -38,5 +38,19 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         [roleId, account.firstName, account.lastName, account.email, passwordHash],
       );
     }
+
+    const trains: { trainNumber: string }[] = await this.dataSource.query(
+      'SELECT DISTINCT train_number AS "trainNumber" FROM route_catalog WHERE is_active = TRUE AND train_number IS NOT NULL',
+    );
+    for (const { trainNumber } of trains) {
+      const licensePlate = `TRAIN-${trainNumber.replace(/[^A-Za-z0-9]/g, '')}`;
+      await this.dataSource.query(
+        `INSERT INTO vehicles (vehicle_type, status, model, license_plate, capacity_seats)
+         VALUES ('train', 'available', $1, $2, 54)
+         ON CONFLICT (license_plate) DO UPDATE
+         SET capacity_seats = COALESCE(vehicles.capacity_seats, EXCLUDED.capacity_seats)`,
+        [`Потяг № ${trainNumber}`, licensePlate],
+      );
+    }
   }
 }

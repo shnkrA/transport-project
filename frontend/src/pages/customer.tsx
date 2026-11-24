@@ -135,7 +135,7 @@ export function AvailableTransportPage() {
       <div className={`customer-vehicle-icon ${vehicle.vehicleType === 'train' ? 'train' : ''}`}>{vehicle.vehicleType === 'train' ? '🚆' : '🚌'}</div><span className="customer-available"><i /> Доступний</span><h2>{vehicle.model}</h2>
       <p>{vehicle.vehicleType === 'train' ? 'Вагон' : 'Автобус'} · до {vehicle.capacitySeats ?? '—'} пасажирів</p><Link to="/trips?create=1" className="text-link">Розрахувати поїздку ↗</Link>
     </article>)}</section>
-    <p className="customer-disclaimer">Статус і місткість беремо з бази проєкту. Реальний розклад, наявність квитків і зайняті місця не синхронізуються з Укрзалізницею.</p>
+    <p className="customer-disclaimer">Реальний розклад, наявність квитків і зайняті місця не синхронізуються з Укрзалізницею.</p>
   </>;
 }
 
@@ -165,7 +165,8 @@ export function CustomerTripsPage() {
     setMessage('');
     const matched = catalog.routes.filter((route) => route.origin.toLocaleLowerCase('uk-UA') === origin.trim().toLocaleLowerCase('uk-UA') && route.destination.toLocaleLowerCase('uk-UA') === destination.trim().toLocaleLowerCase('uk-UA'));
     const options: Proposal[] = matched.flatMap((route) => {
-      const vehicle = vehicles.filter((item) => item.vehicleType === route.transportType && (item.capacitySeats ?? 0) >= passengerCount).sort((a, b) => (a.capacitySeats ?? 0) - (b.capacitySeats ?? 0))[0];
+      const capacity = (item: Vehicle) => item.capacitySeats ?? (route.transportType === 'train' ? 54 : 0);
+      const vehicle = vehicles.filter((item) => item.vehicleType === route.transportType && capacity(item) >= passengerCount).sort((a, b) => capacity(a) - capacity(b))[0];
       if (!vehicle) return [];
       const rate = route.transportType === 'train' ? 1.6 * (seatClasses.find((seat) => seat.value === seatClass)?.multiplier ?? 1) : 2.4;
       return [{ route, vehicle, departureAt: localDateTime(travelDate, route.departureTime), fare: Math.round(route.distanceKm * passengerCount * rate * 100) / 100, driver: null }];
@@ -216,7 +217,17 @@ export function CustomerTripsPage() {
       {proposals.map((proposal) => <article className="panel customer-proposal-card" key={`${proposal.route.id}-${proposal.vehicle.id}`}>
         <div className="proposal-main"><div className={`customer-vehicle-icon ${proposal.route.transportType === 'train' ? 'train' : ''}`}>{proposal.route.transportType === 'train' ? '🚆' : '🚌'}</div><div><span className="proposal-mode">{proposal.route.transportType === 'train' ? `Потяг № ${proposal.route.trainNumber}` : 'Автобус'}</span><h3>{proposal.route.origin} <i>→</i> {proposal.route.destination}</h3><p>Відправлення: {formatDateTime(proposal.departureAt)} · орієнтовно {Math.floor(proposal.route.durationMinutes / 60)} год {proposal.route.durationMinutes % 60} хв</p></div></div>
         <div className="proposal-details">{proposal.route.transportType === 'bus' ? <><span>Транспорт<strong>{proposal.vehicle.model}</strong></span><span>Водій<strong>{proposal.driver ? `${proposal.driver} · підтвердить диспетчер` : 'Призначить диспетчер'}</strong></span></> : <span>Місця у вагоні<strong>До {proposal.vehicle.capacitySeats} за місткістю</strong></span>}<span>Вартість<strong>{getFare(proposal, passengerCount, seatClass).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</strong></span></div>
-        {proposal.route.transportType === 'train' && <div className="customer-field proposal-seat-picker"><label htmlFor={`seats-${proposal.vehicle.id}`}>Тип місця та номери · потрібно {passengerCount}</label><select className="seat-class-select" value={seatClass} onChange={(event) => setSeatClass(event.target.value)}>{seatClasses.map((seat) => <option key={seat.value} value={seat.value}>{seat.label}</option>)}</select><select id={`seats-${proposal.vehicle.id}`} multiple size={Math.min(4, proposal.vehicle.capacitySeats ?? 4)} value={seatNumbers[proposal.vehicle.id] ?? []} onChange={(event) => setSeatNumbers((current) => ({ ...current, [proposal.vehicle.id]: Array.from(event.target.selectedOptions, (option) => option.value) }))}>{Array.from({ length: proposal.vehicle.capacitySeats ?? 0 }, (_, index) => <option value={index + 1} key={index + 1}>Місце {index + 1}</option>)}</select><small>Варіанти місць побудовані за місткістю вагона; актуальний продаж квитків не перевіряється.</small></div>}
+        {proposal.route.transportType === 'train' && <div className="customer-field proposal-seat-picker"><label>Тип місця та номери · потрібно {passengerCount}</label><select className="seat-class-select" value={seatClass} onChange={(event) => setSeatClass(event.target.value)}>{seatClasses.map((seat) => <option key={seat.value} value={seat.value}>{seat.label}</option>)}</select><div className="seat-grid" role="group" aria-label={`Виберіть ${passengerCount} місця`}>
+          {Array.from({ length: Math.min(54, proposal.vehicle.capacitySeats ?? 54) }, (_, index) => {
+            const seat = String(index + 1);
+            const selected = (seatNumbers[proposal.vehicle.id] ?? []).includes(seat);
+            return <label className={`seat-option${selected ? ' selected' : ''}`} key={seat}><input type="checkbox" checked={selected} onChange={(event) => setSeatNumbers((current) => {
+              const selectedSeats = current[proposal.vehicle.id] ?? [];
+              const nextSeats = event.target.checked ? [...selectedSeats, seat] : selectedSeats.filter((value) => value !== seat);
+              return { ...current, [proposal.vehicle.id]: nextSeats };
+            })} /><span>{seat}</span></label>;
+          })}
+        </div><small>Обрано {seatNumbers[proposal.vehicle.id]?.length ?? 0} із {passengerCount} потрібних місць.</small></div>}
         <div className="proposal-actions"><span>Місткість: {proposal.vehicle.capacitySeats ?? '—'} місць · відстань ~{proposal.route.distanceKm} км</span><button className="primary-button" onClick={() => submitProposal({ ...proposal, fare: getFare(proposal, passengerCount, seatClass) })} disabled={busyVehicle !== null}>{busyVehicle === proposal.vehicle.id ? 'Надсилаємо…' : 'Обрати рейс'}</button></div>
       </article>)}
       <p className="customer-disclaimer">Це попередні пропозиції з каталогу маршрутів. Розклад і ціна не є квитком; диспетчер підтвердить транспорт і деталі.</p>

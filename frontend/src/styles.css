@@ -492,6 +492,7 @@ button {
   gap: 14px;
   margin-bottom: 16px
 }
+.dashboard-grid-single { grid-template-columns: minmax(0, 1fr); }
 .panel {
   padding: 17px 18px
 }
@@ -1256,7 +1257,11 @@ tbody tr:last-child td {
 .proposal-seat-picker { grid-template-columns: minmax(120px,.5fr) minmax(200px,1fr); align-items: start; }
 .proposal-seat-picker label,.proposal-seat-picker small { grid-column: 1/-1; }
 .proposal-seat-picker .seat-class-select { min-height: 40px; }
-.proposal-seat-picker select[multiple] { min-height: 90px; }
+.seat-grid { grid-column: 1/-1; display: grid; grid-template-columns: repeat(9, minmax(28px, 1fr)); gap: 6px; }
+.seat-option { display: grid; place-items: center; min-height: 34px; border: 1px solid #dfe6f0; border-radius: 7px; background: #fff; color: #52627a; cursor: pointer; font-size: 11px; }
+.seat-option input { position: absolute; opacity: 0; pointer-events: none; }
+.seat-option.selected { border-color: #3262d7; background: #edf3ff; color: #214db8; font-weight: 750; }
+.seat-option:has(input:focus-visible) { outline: 2px solid #3262d7; outline-offset: 2px; }
 .proposal-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #8793a5; font-size: 11px; }
 .proposal-actions .primary-button { min-height: 40px; padding: 0 16px; }
 .customer-empty h2 { margin: 0 0 7px; color: #33425b; font-size: 18px; }

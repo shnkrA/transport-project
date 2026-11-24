@@ -127,7 +127,7 @@ export class TripsService {
     if (['confirmed', 'in_progress'].includes(status) && vehicle.status !== 'available') {
       throw new ConflictException('Транспорт зараз недоступний або перебуває на техобслуговуванні');
     }
-    if (status === 'confirmed' && trip.departureTime) {
+    if (status === 'confirmed' && trip.departureTime && vehicle.vehicleType !== 'train') {
       const [vehicleConflict] = await this.dataSource.query(
         `SELECT id FROM trips WHERE vehicle_id = $1 AND id <> $2
            AND status IN ('confirmed', 'in_progress')
@@ -201,7 +201,10 @@ export class TripsService {
   }
   findByDriver(driverId: number): Promise<any[]> {
     return this.dataSource.query(
-      `SELECT t.*, v.vehicle_type AS "vehicleType", v.model AS "vehicleModel",
+      `SELECT t.*, t.departure_point AS "departurePoint", t.arrival_point AS "arrivalPoint",
+              t.departure_time AS "departureTime", t.passenger_count AS "passengerCount",
+              t.route_stops AS "routeStops", t.route_distance_km AS "routeDistanceKm",
+              v.vehicle_type AS "vehicleType", v.model AS "vehicleModel",
               v.license_plate AS "licensePlate", v.status AS "vehicleStatus"
        FROM trips t JOIN vehicles v ON v.id = t.vehicle_id
        WHERE t.driver_id = $1 AND v.vehicle_type <> 'train'

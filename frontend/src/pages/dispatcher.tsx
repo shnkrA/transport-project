@@ -52,13 +52,24 @@ export function DispatchPendingPage() {
     setBusy(trip.id); setError('');
     try {
       await api.patch(`/trips/${trip.id}/dispatch`, { status, driverId: ['confirmed', 'in_progress'].includes(status) && isBus ? driverId : undefined });
+      if (status === 'confirmed') {
+        const assignedDriver = drivers.find((driver) => driver.id === driverId);
+        setTrips((current) => current.filter((item) => item.id !== trip.id));
+        setScheduled((current) => [{
+          ...trip,
+          status: 'confirmed',
+          driverId: isBus ? driverId : undefined,
+          driverFirstName: assignedDriver?.firstName ?? trip.driverFirstName,
+          driverLastName: assignedDriver?.lastName ?? trip.driverLastName,
+        }, ...current.filter((item) => item.id !== trip.id)]);
+      }
       await load();
     } catch (reason: any) { setError(reason?.response?.data?.message ?? 'Не вдалося оновити рейс.'); }
     finally { setBusy(null); }
   };
 
   return <>
-    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · ЧЕРГА ЗАЯВОК</div><h1>Рейси на підтвердження</h1><p>Перевірте дані заявки, за потреби призначте водія та підтвердьте рейс.</p></div><button className="filter-button" onClick={() => void load()}>↻ Оновити</button></div>
+    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · ЧЕРГА ЗАЯВОК</div><h1>Рейси на підтвердження</h1><p>Перевірте дані заявки, за потреби призначте водія та підтвердьте рейс.</p></div></div>
     {error && <div className="customer-alert danger">{error}</div>}
     {loading && <div className="panel customer-empty">Завантаження заявок…</div>}
     {!loading && !error && trips.length === 0 && <div className="panel customer-empty"><h2>Немає рейсів на підтвердження</h2><p>Нові заявки клієнтів з’являться тут.</p></div>}
