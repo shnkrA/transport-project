@@ -93,7 +93,7 @@ export function CustomerMyTripsPage() {
   const statusLabel: Record<string, string> = { pending: 'Очікує підтвердження', confirmed: 'Підтверджено', scheduled: 'Заплановано', completed: 'Завершено', cancelled: 'Скасовано', in_progress: 'У дорозі' };
 
   return <>
-    <div className="page-heading"><div><div className="eyebrow">ІСТОРІЯ ПОЇЗДОК</div><h1>Мої рейси</h1><p>Тут зберігаються ваші майбутні та минулі поїздки.</p></div><Link className="primary-button customer-cta" to="/trips?create=1">＋ Створити рейс</Link></div>
+    <div className="page-heading"><div><div className="eyebrow">ІСТОРІЯ ПОЇЗДОК</div><h1>Мої рейси</h1><p>Тут зберігаються ваші майбутні та минулі поїздки.</p></div></div>
     <div className="my-trips-tabs" role="tablist" aria-label="Фільтр рейсів">
       <button className={filter === 'upcoming' ? 'active' : ''} onClick={() => setFilter('upcoming')}>Майбутні <span>{upcoming.length}</span></button>
       <button className={filter === 'past' ? 'active' : ''} onClick={() => setFilter('past')}>Минулі <span>{past.length}</span></button>
@@ -127,7 +127,7 @@ export function CustomerMyTripsPage() {
 export function AvailableTransportPage() {
   const { vehicles, loading, error } = useCustomerData();
   return <>
-    <div className="page-heading"><div><div className="eyebrow">ДЛЯ ВАШОЇ ПОЇЗДКИ</div><h1>Доступний транспорт</h1><p>Транспорт, позначений як доступний у системі.</p></div><Link to="/trips?create=1" className="primary-button customer-cta">Створити рейс →</Link></div>
+    <div className="page-heading"><div><div className="eyebrow">ДЛЯ ВАШОЇ ПОЇЗДКИ</div><h1>Доступний транспорт</h1><p>Транспорт, позначений як доступний у системі.</p></div></div>
     {loading && <div className="panel customer-empty">Завантажуємо транспорт…</div>}
     {error && <div className="customer-alert danger">{error}</div>}
     {!loading && !error && !vehicles.length && <div className="panel customer-empty">Наразі доступного транспорту немає.</div>}
