@@ -66,7 +66,7 @@ export function DriverTripsPage() {
     return () => { window.clearInterval(interval); window.removeEventListener('focus', onFocus); };
   }, [load]);
   const updateStatus = async (trip: DriverTrip, status: string) => { setBusy(trip.id); setError(''); try { await api.patch(`/trips/${trip.id}/driver-status`, { status }); await load(); } catch (reason: any) { setError(reason?.response?.data?.message ?? 'Не вдалося оновити рейс.'); } finally { setBusy(null); } };
-  const report = async (trip: DriverTrip, type: 'breakdown' | 'delay') => { const message = window.prompt(type === 'breakdown' ? 'Що саме зламалося?' : 'Опишіть затримку:'); if (message === null) return; setBusy(trip.id); setError(''); try { await api.post(`/trips/${trip.id}/report`, { type, message }); await load(); } catch (reason: any) { setError(reason?.response?.data?.message ?? 'Не вдалося надіслати повідомлення.'); } finally { setBusy(null); } };
+  const report = async (trip: DriverTrip) => { const message = window.prompt('Що саме зламалося?'); if (message === null) return; setBusy(trip.id); setError(''); try { await api.post(`/trips/${trip.id}/report`, { type: 'breakdown', message }); await load(); } catch (reason: any) { setError(reason?.response?.data?.message ?? 'Не вдалося надіслати повідомлення.'); } finally { setBusy(null); } };
   return <>
     <div className="page-heading"><div><div className="eyebrow">КАБІНЕТ ВОДІЯ</div><h1>Мої рейси</h1><p>Призначені диспетчером автобусні рейси та дорожні листи.</p></div></div>
     {error && <div className="customer-alert danger">{error}</div>}{loading && <div className="panel customer-empty">Завантаження рейсів…</div>}
@@ -80,7 +80,7 @@ export function DriverTripsPage() {
       {trip.status !== 'confirmed' && !trip.routeStops?.length && trip.notes && !trip.notes.includes('Попередня пропозиція рейсу') && <p className="dispatch-note">{trip.notes}</p>}
       <div className="dispatch-actions"><button className="dispatch-reject" onClick={() => downloadRoadSheet(trip)}>Завантажити дорожній лист PDF</button>
         {trip.status === 'confirmed' && <button className="primary-button" disabled={busy === trip.id} onClick={() => void updateStatus(trip, 'in_progress')}>Почати рейс</button>}
-        {trip.status === 'in_progress' && <><button className="primary-button" disabled={busy === trip.id} onClick={() => void updateStatus(trip, 'completed')}>Завершити рейс</button><button className="dispatch-reject" disabled={busy === trip.id} onClick={() => void report(trip, 'breakdown')}>Повідомити про поломку</button><button className="dispatch-reject" disabled={busy === trip.id} onClick={() => void report(trip, 'delay')}>Повідомити про затримку</button></>}
+        {trip.status === 'in_progress' && <><button className="primary-button" disabled={busy === trip.id} onClick={() => void updateStatus(trip, 'completed')}>Завершити рейс</button><button className="dispatch-reject" disabled={busy === trip.id} onClick={() => void report(trip)}>Повідомити про поломку</button></>}
       </div>
     </article>)}
   </>;

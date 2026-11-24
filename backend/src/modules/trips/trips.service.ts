@@ -167,12 +167,13 @@ export class TripsService {
   }
 
   async createDriverReport(tripId: number, driverId: number, type: string, message: string): Promise<any> {
+    if (type !== 'breakdown') throw new BadRequestException('Доступне лише повідомлення про поломку');
     const trip = await this.findOne(tripId);
     if (Number(trip.driverId) !== driverId || trip.status !== 'in_progress') throw new ConflictException('Повідомлення можна надіслати лише для свого рейсу в дорозі');
     const [report] = await this.dataSource.query(
       `INSERT INTO driver_reports (trip_id, vehicle_id, driver_id, type, message)
        VALUES ($1, $2, $3, $4, $5) RETURNING id, trip_id AS "tripId", vehicle_id AS "vehicleId", type, message, status, created_at AS "createdAt"`,
-      [tripId, trip.vehicleId, driverId, type, message.trim() || (type === 'breakdown' ? 'Потрібен огляд механіка' : 'Повідомлення про затримку')],
+      [tripId, trip.vehicleId, driverId, type, message.trim() || 'Потрібен огляд механіка'],
     );
     if (type === 'breakdown') await this.dataSource.query("UPDATE vehicles SET status = 'maintenance', updated_at = NOW() WHERE id = $1", [trip.vehicleId]);
     return report;

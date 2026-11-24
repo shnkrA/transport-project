@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import api from '../services/api';
 import { useAutoRefresh } from '../services/use-auto-refresh';
 
-type Report = { id: number; type: 'breakdown' | 'delay'; message: string; status: string; repairPrice?: number | string; createdAt: string; driverName: string };
+type Report = { id: number; type: 'breakdown'; message: string; status: string; repairPrice?: number | string; createdAt: string; driverName: string };
 type Vehicle = { id: number; vehicleType: string; status: string; model: string; licensePlate: string; reports: Report[]; lastRepair?: { message: string; price: number | string; type: string } };
 const states: Record<string, string> = { available: 'Доступний', maintenance: 'На ТО', out_of_service: 'Не експлуатується', in_trip: 'У дорозі' };
 
@@ -20,7 +20,7 @@ export function MechanicVehiclesPage() {
     <section className="customer-vehicle-grid">{vehicles.map(vehicle => <article className="panel dispatch-vehicle-card" key={vehicle.id}>
       <div className={`customer-vehicle-icon ${vehicle.vehicleType === 'train' ? 'train' : ''}`}>{vehicle.vehicleType === 'train' ? '🚆' : '🚌'}</div><span className={`vehicle-state ${vehicle.status}`}>{states[vehicle.status] ?? vehicle.status}</span><h2>{vehicle.model}</h2><p>{vehicle.licensePlate}</p>
       {vehicle.lastRepair && <p className="dispatch-note">Останній рахунок: {vehicle.lastRepair.type === 'breakdown' ? 'Поламка' : 'Роботи'} ({vehicle.lastRepair.message}) — {Number(vehicle.lastRepair.price).toLocaleString('uk-UA')} грн</p>}
-      {vehicle.reports.map(report => <div className="mechanic-report" key={report.id}><strong>{report.type === 'breakdown' ? 'ПОЛАМКА' : 'ЗАТРИМКА'} ({report.message})</strong><p>{report.driverName} · {new Date(report.createdAt).toLocaleString('uk-UA')}</p>{report.repairPrice != null && <p>Рахунок: {Number(report.repairPrice).toLocaleString('uk-UA')} грн</p>}<button className="primary-button" disabled={busy === `report-${report.id}`} onClick={() => void resolve(report)}>Записати ремонт і закрити</button></div>)}
+      {vehicle.reports.map(report => <div className="mechanic-report" key={report.id}><strong>ПОЛАМКА ({report.message})</strong><p>{report.driverName} · {new Date(report.createdAt).toLocaleString('uk-UA')}</p>{report.repairPrice != null && <p>Рахунок: {Number(report.repairPrice).toLocaleString('uk-UA')} грн</p>}<button className="primary-button" disabled={busy === `report-${report.id}`} onClick={() => void resolve(report)}>Записати ремонт і закрити</button></div>)}
       <label className="dispatch-status-field">Стан транспорту<select value={vehicle.status} disabled={busy === `vehicle-${vehicle.id}` || vehicle.status === 'in_trip'} onChange={event => void changeStatus(vehicle, event.target.value)}><option value="available">Доступний</option><option value="maintenance">На ТО</option><option value="out_of_service">Не експлуатується</option></select></label>
     </article>)}</section>
   </>;

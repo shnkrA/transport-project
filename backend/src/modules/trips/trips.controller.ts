@@ -40,7 +40,7 @@ export class TripsController {
   @Post(':id/report')
   @UseGuards(RoleGuard)
   report(@Param('id') id: string, @Body() data: { type: string; message?: string }, @Req() request: any): Promise<unknown> {
-    if (!['breakdown', 'delay'].includes(data?.type ?? '')) throw new BadRequestException('Оберіть поломку або затримку');
+    if (data?.type !== 'breakdown') throw new BadRequestException('Доступне лише повідомлення про поломку');
     return this.tripsService.createDriverReport(+id, request.user.id, data.type, data.message ?? '');
   }
 

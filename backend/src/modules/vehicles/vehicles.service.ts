@@ -20,7 +20,7 @@ export class VehiclesService {
               reports.last_repair AS "lastRepair"
        FROM vehicles v LEFT JOIN trips t ON t.vehicle_id = v.id AND t.status = 'in_progress'
        LEFT JOIN LATERAL (
-         SELECT (SELECT json_agg(json_build_object('id', r.id, 'type', r.type, 'message', r.message, 'status', r.status, 'repairPrice', r.repair_price)) FROM driver_reports r WHERE r.vehicle_id = v.id AND r.status <> 'resolved') AS open_reports,
+         SELECT (SELECT json_agg(json_build_object('id', r.id, 'type', r.type, 'message', r.message, 'status', r.status, 'repairPrice', r.repair_price)) FROM driver_reports r WHERE r.vehicle_id = v.id AND r.type = 'breakdown' AND r.status <> 'resolved') AS open_reports,
                 (SELECT json_build_object('message', r.mechanic_notes, 'price', r.repair_price, 'type', r.type) FROM driver_reports r WHERE r.vehicle_id = v.id AND r.status = 'resolved' AND r.repair_price IS NOT NULL ORDER BY r.resolved_at DESC LIMIT 1) AS last_repair
        ) reports ON TRUE
        ORDER BY v.vehicle_type, v.model`,
@@ -31,10 +31,10 @@ export class VehiclesService {
     return this.dataSource.query(
       `SELECT v.id, v.vehicle_type AS "vehicleType", v.status, v.model, v.license_plate AS "licensePlate",
               (SELECT json_build_object('message', r.mechanic_notes, 'price', r.repair_price, 'type', r.type) FROM driver_reports r WHERE r.vehicle_id = v.id AND r.status = 'resolved' AND r.repair_price IS NOT NULL ORDER BY r.resolved_at DESC LIMIT 1) AS "lastRepair",
-              COALESCE(json_agg(json_build_object('id', r.id, 'type', r.type, 'message', r.message, 'status', r.status, 'repairPrice', r.repair_price, 'createdAt', r.created_at, 'driverName', d.first_name || ' ' || d.last_name)) FILTER (WHERE r.id IS NOT NULL AND r.status <> 'resolved'), '[]'::json) AS reports
+              COALESCE(json_agg(json_build_object('id', r.id, 'type', r.type, 'message', r.message, 'status', r.status, 'repairPrice', r.repair_price, 'createdAt', r.created_at, 'driverName', d.first_name || ' ' || d.last_name)) FILTER (WHERE r.id IS NOT NULL AND r.type = 'breakdown' AND r.status <> 'resolved'), '[]'::json) AS reports
        FROM vehicles v LEFT JOIN driver_reports r ON r.vehicle_id = v.id
        LEFT JOIN users d ON d.id = r.driver_id
-       WHERE v.status = 'maintenance' OR r.status <> 'resolved'
+       WHERE v.status = 'maintenance' OR (r.type = 'breakdown' AND r.status <> 'resolved')
        GROUP BY v.id ORDER BY v.status = 'maintenance' DESC, v.model`);
   }
 
@@ -48,9 +48,9 @@ export class VehiclesService {
   }
 
   async resolveReport(id: number, mechanicId: number, message: string, price: number): Promise<any> {
-    const [report] = await this.dataSource.query("UPDATE driver_reports SET status = 'resolved', mechanic_notes = $2, repair_price = $3, mechanic_id = $4, resolved_at = NOW() WHERE id = $1 AND status <> 'resolved' RETURNING vehicle_id AS \"vehicleId\"", [id, message.trim(), price, mechanicId]);
+    const [report] = await this.dataSource.query("UPDATE driver_reports SET status = 'resolved', mechanic_notes = $2, repair_price = $3, mechanic_id = $4, resolved_at = NOW() WHERE id = $1 AND type = 'breakdown' AND status <> 'resolved' RETURNING vehicle_id AS \"vehicleId\"", [id, message.trim(), price, mechanicId]);
     if (!report) throw new NotFoundException('Повідомлення вже закрите або не знайдене');
-    const [open] = await this.dataSource.query("SELECT id FROM driver_reports WHERE vehicle_id = $1 AND status <> 'resolved' LIMIT 1", [report.vehicleId]);
+    const [open] = await this.dataSource.query("SELECT id FROM driver_reports WHERE vehicle_id = $1 AND type = 'breakdown' AND status <> 'resolved' LIMIT 1", [report.vehicleId]);
     const [activeTrip] = await this.dataSource.query("SELECT id FROM trips WHERE vehicle_id = $1 AND status IN ('confirmed', 'in_progress') LIMIT 1", [report.vehicleId]);
     if (!open && !activeTrip) await this.dataSource.query("UPDATE vehicles SET status = 'available', updated_at = NOW() WHERE id = $1 AND status = 'maintenance'", [report.vehicleId]);
     return { success: true };
