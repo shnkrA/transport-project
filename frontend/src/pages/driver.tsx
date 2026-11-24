@@ -70,7 +70,9 @@ export function DriverTripsPage() {
       <div className="dispatch-card-top"><span className="trip-id">Рейс №{trip.id}</span><span className={`trip-status ${trip.status}`}>{statusLabels[trip.status] ?? trip.status}</span></div>
       <h2>{trip.departurePoint} <i>→</i> {trip.arrivalPoint}</h2>
       <div className="dispatch-details"><span>Виїзд<strong>{tripDate(trip.departureTime)}</strong></span><span>Автобус<strong>{trip.vehicleModel} · {trip.licensePlate}</strong></span><span>Пасажири<strong>{trip.passengerCount ?? '—'}</strong></span><span>Стан транспорту<strong>{vehicleStatusLabel(trip.vehicleStatus)}</strong></span></div>
-      {(trip.routeStops?.length || trip.notes) && <p className="dispatch-note">{trip.routeStops?.length ? `Зупинки: ${trip.routeStops.join(' · ')}` : trip.notes}</p>}
+      {trip.status === 'confirmed' && <p className="dispatch-note">Диспетчер підтвердив цей рейс. Можна розпочинати поїздку.</p>}
+      {!!trip.routeStops?.length && <p className="dispatch-note">Зупинки: {trip.routeStops.join(' · ')}</p>}
+      {trip.status !== 'confirmed' && !trip.routeStops?.length && trip.notes && !trip.notes.includes('Попередня пропозиція рейсу') && <p className="dispatch-note">{trip.notes}</p>}
       <div className="dispatch-actions"><button className="dispatch-reject" onClick={() => downloadRoadSheet(trip)}>Завантажити дорожній лист PDF</button>
         {trip.status === 'confirmed' && <button className="primary-button" disabled={busy === trip.id} onClick={() => void updateStatus(trip, 'in_progress')}>Почати рейс</button>}
         {trip.status === 'in_progress' && <><button className="primary-button" disabled={busy === trip.id} onClick={() => void updateStatus(trip, 'completed')}>Завершити рейс</button><button className="dispatch-reject" disabled={busy === trip.id} onClick={() => void report(trip, 'breakdown')}>Повідомити про поломку</button><button className="dispatch-reject" disabled={busy === trip.id} onClick={() => void report(trip, 'delay')}>Повідомити про затримку</button></>}

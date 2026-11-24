@@ -107,7 +107,6 @@ export function DispatchPendingPage() {
 export function DispatchInProgressPage() {
   const [trips, setTrips] = useState<DispatchTrip[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<number | null>(null);
   const [error, setError] = useState('');
   const load = useCallback(async () => {
     try { const { data } = await api.get('/trips/dispatch/board', { params: { status: 'in_progress' } }); setTrips(data); }
@@ -116,17 +115,11 @@ export function DispatchInProgressPage() {
   }, []);
   useEffect(() => { void load(); }, [load]);
   useAutoRefresh(load);
-  const complete = async (id: number) => {
-    setBusy(id); setError('');
-    try { await api.patch(`/trips/${id}/dispatch`, { status: 'completed' }); await load(); }
-    catch (reason: any) { setError(reason?.response?.data?.message ?? 'Не вдалося завершити рейс.'); }
-    finally { setBusy(null); }
-  };
   return <>
     <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · ВИКОНАННЯ</div><h1>Рейси у дорозі</h1><p>Активні рейси та призначені водії й транспорт.</p></div></div>
     {error && <div className="customer-alert danger">{error}</div>}{loading && <div className="panel customer-empty">Завантаження рейсів…</div>}
     {!loading && !error && trips.length === 0 && <div className="panel customer-empty"><h2>Зараз немає рейсів у дорозі</h2><p>Підтверджені рейси з’являться тут після початку руху.</p></div>}
-    {trips.map((trip) => <article className="panel dispatch-card" key={trip.id}><div className="dispatch-card-top"><span className="trip-id">Рейс №{trip.id}</span><span className="trip-status in_progress">У дорозі</span></div><h2>{trip.departurePoint ?? trip.departure_point} <i>→</i> {trip.arrivalPoint ?? trip.arrival_point}</h2><div className="dispatch-details"><span>Виїзд<strong>{tripDate(trip.departureTime ?? trip.departure_time)}</strong></span><span>Транспорт<strong>{trip.vehicleModel ?? trip.vehicle_model} · {trip.licensePlate}</strong></span><span>Водій<strong>{trip.driverFirstName ? `${trip.driverFirstName} ${trip.driverLastName ?? ''}` : 'Не призначено'}</strong></span><span>Пасажири<strong>{trip.passengerCount ?? trip.passenger_count ?? '—'}</strong></span></div><div className="dispatch-actions"><button className="primary-button" disabled={busy === trip.id} onClick={() => void complete(trip.id)}>{busy === trip.id ? 'Зберігаємо…' : 'Завершити рейс'}</button></div></article>)}
+    {trips.map((trip) => <article className="panel dispatch-card" key={trip.id}><div className="dispatch-card-top"><span className="trip-id">Рейс №{trip.id}</span><span className="trip-status in_progress">У дорозі</span></div><h2>{trip.departurePoint ?? trip.departure_point} <i>→</i> {trip.arrivalPoint ?? trip.arrival_point}</h2><div className="dispatch-details"><span>Виїзд<strong>{tripDate(trip.departureTime ?? trip.departure_time)}</strong></span><span>Транспорт<strong>{trip.vehicleModel ?? trip.vehicle_model} · {trip.licensePlate}</strong></span><span>Водій<strong>{trip.driverFirstName ? `${trip.driverFirstName} ${trip.driverLastName ?? ''}` : 'Не призначено'}</strong></span><span>Пасажири<strong>{trip.passengerCount ?? trip.passenger_count ?? '—'}</strong></span></div><p className="dispatch-note">Статус рейсу оновлює водій після завершення поїздки.</p></article>)}
   </>;
 }
 

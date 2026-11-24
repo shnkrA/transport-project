@@ -93,7 +93,7 @@ export class TripsService {
     const allowedNext: Record<string, string[]> = {
       pending: ['confirmed', 'cancelled'],
       confirmed: ['in_progress', 'cancelled'],
-      in_progress: ['completed'],
+      in_progress: [],
     };
     if (!allowedNext[trip.status]?.includes(status)) {
       throw new ConflictException(`Не можна змінити статус рейсу з ${trip.status} на ${status}`);
@@ -180,7 +180,8 @@ export class TripsService {
 
   async findAll(query?: any): Promise<any[]> {
     return this.dataSource.query(
-      `SELECT t.*, v.vehicle_type AS "vehicleType", v.model AS "vehicleModel",
+      `SELECT t.*, t.departure_point AS "departurePoint", t.arrival_point AS "arrivalPoint",
+              t.departure_time AS "departureTime", v.vehicle_type AS "vehicleType", v.model AS "vehicleModel",
               v.license_plate AS "licensePlate", d.first_name AS "driverFirstName",
               d.last_name AS "driverLastName"
        FROM trips t
