@@ -14,7 +14,7 @@ function EntryRedirect() {
 
 function RoleRoute({ children, customerOnly = false, dispatcherOnly = false, driverOnly = false, mechanicOnly = false }: { children: JSX.Element; customerOnly?: boolean; dispatcherOnly?: boolean; driverOnly?: boolean; mechanicOnly?: boolean }) {
   const user = getCurrentUser();
-  if (!localStorage.getItem('accessToken') || !user) return <Navigate to="/register" replace />;
+  if (!user) return <Navigate to="/register" replace />;
   if (customerOnly && user.role !== 'user') return <Navigate to="/dashboard" replace />;
   if (dispatcherOnly && user.role !== 'dispatcher') return <Navigate to="/dashboard" replace />;
   if (driverOnly && user.role !== 'driver') return <Navigate to="/dashboard" replace />;

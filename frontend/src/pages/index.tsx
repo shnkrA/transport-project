@@ -88,7 +88,6 @@ export function LoginPage() {
     const form = new FormData(event.currentTarget);
     try {
       const { data } = await api.post('/auth/login', { email, password: form.get('password') });
-      localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
       navigate(data.user.role === 'dispatcher' ? '/dispatch/pending' : data.user.role === 'driver' ? '/driver/trips' : data.user.role === 'mechanic' ? '/mechanic/vehicles' : '/dashboard');
     } catch { setError('Перевірте пошту й пароль та спробуйте ще раз.'); }
@@ -107,7 +106,6 @@ export function RegisterPage() {
         firstName: form.get('firstName'), lastName: form.get('lastName'),
         email: form.get('email'), password: form.get('password'),
       });
-      localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
       navigate('/dashboard');
     } catch (reason: any) {

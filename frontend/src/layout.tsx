@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { getCurrentUser, getRoleLabel, getUserInitials } from './services/session';
+import api from './services/api';
 
 const staffNavigation = [
   { label: 'Огляд', path: '/dashboard', icon: '◫' },
@@ -51,8 +52,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const title = (isCustomer ? customerTitles : isDispatcher ? dispatcherTitles : isDriver ? driverTitles : isMechanic ? mechanicTitles : titles)[location.pathname] ?? 'Огляд';
   const navigation = isCustomer ? customerNavigation : isDispatcher ? dispatcherNavigation : isDriver ? driverNavigation : isMechanic ? mechanicNavigation : staffNavigation;
 
-  const logout = () => {
-    localStorage.removeItem('accessToken');
+  const logout = async () => {
+    try { await api.post('/auth/logout'); } catch { /* Clear local UI state even if the server session expired. */ }
     localStorage.removeItem('currentUser');
     navigate('/register');
   };
