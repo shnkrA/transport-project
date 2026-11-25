@@ -73,7 +73,7 @@ export function DispatchPendingPage() {
   };
 
   return <>
-    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · ЧЕРГА ЗАМОВЛЕНЬ</div><h1>Рейси на підтвердження</h1><p>Перевірте дані замовлення, за потреби призначте водія та підтвердьте рейс.</p></div></div>
+    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · ЧЕРГА ЗАМОВЛЕНЬ</div><h1>Рейси на підтвердження</h1><p>Перевірте дані замовлення, за потреби призначте водія та підтвердьте рейс</p></div></div>
     {error && <div className="customer-alert danger">{error}</div>}
     {loading && <div className="panel customer-empty">Завантаження заявок…</div>}
     {!loading && !error && trips.length === 0 && <div className="panel customer-empty"><h2>Немає рейсів на підтвердження</h2><p>Нові замовлення клієнтів з’являться тут.</p></div>}
@@ -118,9 +118,9 @@ export function DispatchInProgressPage() {
   useEffect(() => { void load(); }, [load]);
   useAutoRefresh(load);
   return <>
-    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · ВИКОНАННЯ</div><h1>Рейси у дорозі</h1><p>Активні рейси та призначені водії й транспорт.</p></div></div>
+    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · ВИКОНАННЯ</div><h1>Рейси у дорозі</h1><p>Активні рейси та призначені водії й транспорт</p></div></div>
     {error && <div className="customer-alert danger">{error}</div>}{loading && <div className="panel customer-empty">Завантаження рейсів…</div>}
-    {!loading && !error && trips.length === 0 && <div className="panel customer-empty"><h2>Зараз немає рейсів у дорозі</h2><p>Підтверджені рейси з’являться тут після початку руху.</p></div>}
+    {!loading && !error && trips.length === 0 && <div className="panel customer-empty"><h2>Зараз немає рейсів у дорозі</h2><p>Підтверджені рейси з’являться тут після початку руху</p></div>}
     {trips.map((trip) => <article className="panel dispatch-card" key={trip.id}><div className="dispatch-card-top"><span className="trip-id">Рейс №{trip.id}</span><span className="trip-status in_progress">У дорозі</span></div><h2>{trip.departurePoint ?? trip.departure_point} <i>→</i> {trip.arrivalPoint ?? trip.arrival_point}</h2><div className="dispatch-details"><span>Виїзд<strong>{tripDate(trip.departureTime ?? trip.departure_time)}</strong></span><span>Транспорт<strong>{trip.vehicleModel ?? trip.vehicle_model} · {trip.licensePlate}</strong></span><span>Водій<strong>{trip.driverFirstName ? `${trip.driverFirstName} ${trip.driverLastName ?? ''}` : 'Не призначено'}</strong></span><span>Пасажири<strong>{trip.passengerCount ?? trip.passenger_count ?? '—'}</strong></span></div><p className="dispatch-note">Статус рейсу оновлює водій після завершення поїздки.</p></article>)}
   </>;
 }
@@ -144,8 +144,8 @@ export function DispatchVehiclesPage() {
     finally { setBusy(null); }
   };
   return <>
-    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · АВТОПАРК</div><h1>Транспорт і ТО</h1><p>Позначайте транспорт доступним, на техобслуговуванні або виведеним з експлуатації.</p></div></div>
-    <div className="customer-info-strip"><span>i</span><p>Транспорт зі статусом «На ТО» чи «Не експлуатується» не пропонуватиметься для нових рейсів. Статус того самого транспорту зможуть бачити водії у своєму майбутньому кабінеті.</p></div>
+    <div className="page-heading"><div><div className="eyebrow">ДИСПЕТЧЕРСЬКА · АВТОПАРК</div><h1>Транспорт і ТО</h1><p>Позначайте транспорт доступним, на техобслуговуванні або виведеним з експлуатації</p></div></div>
+    <div className="customer-info-strip"><span>i</span><p>Транспорт зі статусом «На ТО» чи «Не експлуатується» не пропонуватиметься для нових рейсів</p></div>
     {error && <div className="customer-alert danger">{error}</div>}{loading && <div className="panel customer-empty">Завантаження автопарку…</div>}
     <section className="customer-vehicle-grid">{vehicles.map((vehicle) => <article className="panel dispatch-vehicle-card" key={vehicle.id}><div className={`customer-vehicle-icon ${vehicle.vehicleType === 'train' ? 'train' : ''}`}>{vehicle.vehicleType === 'train' ? '🚆' : '🚌'}</div>{!!vehicle.openReports?.length && <span className="vehicle-alert-icon" title={vehicle.openReports.map(report => `Поломка: ${report.message}`).join('\n')}>⚠ {vehicle.openReports.length}</span>}<span className={`vehicle-state ${vehicle.status}`}>{vehicleStatusLabels[vehicle.status] ?? vehicle.status}</span><h2>{vehicle.model}</h2><p>{vehicle.licensePlate} · {vehicle.capacitySeats ?? '—'} місць</p>{vehicle.openReports?.map(report => <p className="dispatch-note vehicle-report-note" key={report.id}>Поломка: {report.message}{report.repairPrice != null ? ` · ${Number(report.repairPrice).toLocaleString('uk-UA')} грн` : ''}</p>)}{vehicle.lastRepair && <p className="dispatch-note">Останній рахунок: {vehicle.lastRepair.type === 'breakdown' ? 'Поламка' : 'Роботи'} ({vehicle.lastRepair.message}) — {Number(vehicle.lastRepair.price).toLocaleString('uk-UA')} грн</p>}{vehicle.activeTripId && <p className="dispatch-note">Зараз у рейсі: {vehicle.departurePoint} → {vehicle.arrivalPoint}</p>}<label className="dispatch-status-field">Стан транспорту<select value={vehicle.status} disabled={busy === vehicle.id || vehicle.status === 'in_trip'} onChange={(event) => void setStatus(vehicle, event.target.value)}><option value="available">Доступний</option><option value="maintenance">На ТО</option><option value="out_of_service">Не експлуатується</option>{vehicle.status === 'in_trip' && <option value="in_trip">У рейсі</option>}</select></label></article>)}</section>
   </>;

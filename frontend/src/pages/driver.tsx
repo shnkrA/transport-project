@@ -68,7 +68,7 @@ export function DriverTripsPage() {
   const updateStatus = async (trip: DriverTrip, status: string) => { setBusy(trip.id); setError(''); try { await api.patch(`/trips/${trip.id}/driver-status`, { status }); await load(); } catch (reason: any) { setError(reason?.response?.data?.message ?? 'Не вдалося оновити рейс.'); } finally { setBusy(null); } };
   const report = async (trip: DriverTrip) => { const message = window.prompt('Що саме зламалося?'); if (message === null) return; setBusy(trip.id); setError(''); try { await api.post(`/trips/${trip.id}/report`, { type: 'breakdown', message }); await load(); } catch (reason: any) { setError(reason?.response?.data?.message ?? 'Не вдалося надіслати повідомлення.'); } finally { setBusy(null); } };
   return <>
-    <div className="page-heading"><div><div className="eyebrow">КАБІНЕТ ВОДІЯ</div><h1>Мої рейси</h1><p>Призначені диспетчером автобусні рейси та дорожні листи.</p></div></div>
+    <div className="page-heading"><div><div className="eyebrow">КАБІНЕТ ВОДІЯ</div><h1>Мої рейси</h1><p>Призначені диспетчером автобусні рейси та дорожні листи</p></div></div>
     {error && <div className="customer-alert danger">{error}</div>}{loading && <div className="panel customer-empty">Завантаження рейсів…</div>}
     {!loading && !error && trips.length === 0 && <div className="panel customer-empty"><h2>Призначених рейсів поки немає</h2><p>Коли диспетчер призначить вам рейс, він з’явиться тут.</p></div>}
     {trips.map((trip) => <article className="panel dispatch-card" key={trip.id}>
